@@ -1,10 +1,363 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>내 페이지</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>인물 소개</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f2ed;
+      --ink: #1a1714;
+      --muted: #7a7269;
+      --accent: #b8a98a;
+      --line: #ddd8cf;
+      --card: #ffffff;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    /* subtle grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      width: 100%;
+      animation: fadeUp 0.9s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── header label ── */
+    .label {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    /* ── card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      overflow: hidden;
+      animation: fadeUp 0.9s 0.15s ease both;
+    }
+
+    /* ── image side ── */
+    .image-side {
+      position: relative;
+      background: #e8e3da;
+      overflow: hidden;
+      min-height: 400px;
+    }
+
+    .image-side img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+
+    .card:hover .image-side img {
+      transform: scale(1.03);
+    }
+
+    /* placeholder when no image */
+    .placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--accent);
+      cursor: pointer;
+      transition: background 0.3s;
+      position: relative;
+    }
+    .placeholder:hover { background: #ddd8cf; }
+
+    .placeholder-icon {
+      width: 48px;
+      height: 48px;
+      border: 1.5px dashed var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .placeholder-icon svg { width: 20px; height: 20px; }
+
+    .placeholder-text {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      font-weight: 400;
+    }
+
+    /* hidden file input */
+    #imgInput { display: none; }
+
+    /* image number tag */
+    .img-tag {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 11px;
+      font-style: italic;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── info side ── */
+    .info-side {
+      padding: 44px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 32px;
+    }
+
+    .info-top {}
+
+    .name-en {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 11px;
+      font-style: italic;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .name-ko {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 40px;
+      font-weight: 300;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+    }
+
+    .role {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .divider {
+      width: 32px;
+      height: 1px;
+      background: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .bio {
+      font-size: 13.5px;
+      line-height: 1.85;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    /* ── meta list ── */
+    .meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 24px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .meta-key {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      min-width: 56px;
+    }
+
+    .meta-val {
+      font-size: 13px;
+      color: var(--ink);
+      font-weight: 300;
+    }
+
+    /* ── footer ── */
+    .footer {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: fadeUp 0.9s 0.3s ease both;
+    }
+
+    .footer-note {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    .edit-btn {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: transparent;
+      border: 1px solid var(--line);
+      padding: 9px 20px;
+      cursor: pointer;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .edit-btn:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+    /* ── responsive ── */
+    @media (max-width: 560px) {
+      .card { grid-template-columns: 1fr; }
+      .image-side { min-height: 260px; }
+      .info-side { padding: 32px 24px; }
+      .name-ko { font-size: 32px; }
+    }
+  </style>
 </head>
 <body>
-  <h1>안녕하세요!</h1>
+
+<div class="page">
+
+  <div class="label">Profile</div>
+
+  <div class="card">
+
+    <!-- 이미지 영역 -->
+    <div class="image-side" id="imageSide">
+      <div class="placeholder" id="placeholder" onclick="document.getElementById('imgInput').click()">
+        <div class="placeholder-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+        </div>
+        <span class="placeholder-text">이미지 추가</span>
+      </div>
+      <input type="file" id="imgInput" accept="image/*" onchange="loadImage(event)" />
+      <div class="img-tag" id="imgTag"></div>
+    </div>
+
+    <!-- 인물 정보 영역 -->
+    <div class="info-side">
+      <div class="info-top">
+        <div class="name-en">영어이름</div>
+        <div class="name-ko">한글이름</div>
+        <div class="role">직업</div>
+        <div class="divider"></div>
+        <p class="bio">
+          여기에 인물 소개 내용
+        </p>
+      </div>
+
+      <div class="meta-list">
+        <div class="meta-item">
+          <span class="meta-key">출생</span>
+          <span class="meta-val">여기에 출생</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">외형</span>
+          <span class="meta-val">여기에 외형</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">성격</span>
+          <span class="meta-val">여기에 성격</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key">소개</span>
+          <span class="meta-val">여기에 간략 배경</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- .card -->
+
+  <div class="footer">
+    <span class="footer-note">© 2026 · 인물 소개 페이지</span>
+    <button class="edit-btn" onclick="alert('편집 기능을 여기에 연결하세요.')">Edit Profile</button>
+  </div>
+
+</div><!-- .page -->
+
+<script>
+  function loadImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const side = document.getElementById('imageSide');
+      const ph   = document.getElementById('placeholder');
+      const tag  = document.getElementById('imgTag');
+
+      // remove placeholder, insert img
+      ph.remove();
+      let img = side.querySelector('img');
+      if (!img) {
+        img = document.createElement('img');
+        side.insertBefore(img, side.querySelector('input'));
+      }
+      img.src = e.target.result;
+      tag.textContent = file.name.replace(/\.[^.]+$/, '');
+    };
+    reader.readAsDataURL(file);
+  }
+</script>
+
 </body>
-</html
+</html>
