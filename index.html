@@ -481,6 +481,51 @@ body.editing .btn-save   { display: inline-block; }
     };
     reader.readAsDataURL(file);
   }
+  let snapshot = {};
+
+function captureValues() {
+  return {
+    nameEn: val('nameEn'), nameKo: val('nameKo'),
+    role:   val('role'),   bio:    val('bio'),
+    meta:  [val('meta0'), val('meta1'), val('meta2'), val('meta3')]
+  };
+}
+
+function val(id) { return document.getElementById(id).value; }
+function set(id, v) { document.getElementById(id).value = v; }
+
+function enterEdit() {
+  snapshot = captureValues();           // 취소용 스냅샷 저장
+  document.body.classList.add('editing');
+  document.getElementById('pageLabel').textContent = 'Edit Profile';
+  autoResize(document.getElementById('bio'));
+}
+
+function cancelEdit() {
+  set('nameEn', snapshot.nameEn);       // 스냅샷으로 롤백
+  set('nameKo', snapshot.nameKo);
+  set('role',   snapshot.role);
+  set('bio',    snapshot.bio);
+  snapshot.meta.forEach((v, i) => set('meta' + i, v));
+  document.body.classList.remove('editing');
+  document.getElementById('pageLabel').textContent = 'Profile';
+}
+
+function saveEdit() {
+  document.body.classList.remove('editing');
+  document.getElementById('pageLabel').textContent = 'Profile';
+  const btn = document.getElementById('saveBtn');
+  btn.classList.add('saved');
+  btn.textContent = '저장됨 ✓';
+  setTimeout(() => { btn.classList.remove('saved'); btn.textContent = '저장하기'; }, 2000);
+}
+
+// textarea 높이 자동 조절
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+document.getElementById('bio').addEventListener('input', function() { autoResize(this); });
 </script>
 
 </body>
