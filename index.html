@@ -269,12 +269,118 @@
       .info-side { padding: 32px 24px; }
       .name-ko { font-size: 32px; }
     }
+    /* 상단 배너 */
+.mode-banner {
+  height: 0;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: height 0.4s ease, margin-bottom 0.4s ease;
+  margin-bottom: 0;
+}
+body.editing .mode-banner {
+  height: 36px;
+  margin-bottom: 16px;
+}
+
+/* 편집 모드일 때 card 테두리 색 변경 */
+body.editing .card { border-color: var(--edit-border); }
+body.editing .label { color: var(--edit-focus); }
+
+/* 각 필드 위에 뜨는 라벨 */
+.field-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--edit-focus);
+  opacity: 0; height: 0; overflow: hidden;
+  transition: opacity 0.3s 0.1s, height 0.3s;
+}
+body.editing .field-label { opacity: 1; height: 14px; }
+
+/* input/textarea — 기본엔 투명, 편집 모드에서만 활성화 */
+.edit-input, .edit-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 2px 0;
+  font-family: inherit;
+  color: inherit;
+  outline: none;
+  resize: none;
+  pointer-events: none; /* 뷰 모드에서 클릭 차단 */
+  transition: border-color 0.25s, padding 0.25s;
+}
+body.editing .edit-input,
+body.editing .edit-textarea {
+  pointer-events: all;
+  border-bottom-color: var(--line);
+  padding: 4px 0;
+}
+body.editing .edit-input:hover,
+body.editing .edit-textarea:hover { border-bottom-color: var(--edit-border); }
+.edit-input:focus,
+.edit-textarea:focus { border-bottom-color: var(--edit-focus) !important; }
+
+/* 이미지 변경 오버레이 */
+.img-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(26,23,20,0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.img-overlay svg { width: 22px; height: 22px; color: #fff; }
+.img-overlay span { font-size: 11px; letter-spacing: 0.1em; color: #fff; }
+body.editing .img-overlay { opacity: 1; pointer-events: all; }
+body.editing .img-overlay:hover { background: rgba(26,23,20,0.5); }
+
+/* 버튼 전환 */
+.btn-cancel { display: none; }
+.btn-save   { display: none; background: var(--ink); color: var(--bg); border-color: var(--ink); }
+body.editing .btn-edit   { display: none; }
+body.editing .btn-cancel { display: inline-block; }
+body.editing .btn-save   { display: inline-block; }
+
+/* 저장 완료 플래시 */
+@keyframes flashSave {
+  0%   { background: var(--accent); border-color: var(--accent); }
+  100% { background: var(--ink);    border-color: var(--ink); }
+}
+.btn-save.saved { animation: flashSave 0.5s ease; }
   </style>
 </head>
 <body>
 
 <div class="page">
 
+  <!-- 상단 편집 배너 (card 위에 삽입) -->
+<div class="mode-banner">
+  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round"
+      d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213l-4.5 1.5 1.5-4.5L16.862 3.487z"/>
+  </svg>
+  편집 모드 — 내용을 수정하고 저장하세요
+</div>
+  
   <div class="label">Profile</div>
 
   <div class="card">
