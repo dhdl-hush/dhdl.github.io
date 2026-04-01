@@ -372,7 +372,7 @@ body.editing .btn-save   { display: inline-block; }
 
 <div class="page">
 
-  <!-- 상단 편집 배너 (card 위에 삽입) -->
+  <!-- 상단 편집 배너 -->
 <div class="mode-banner">
   <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round"
@@ -381,8 +381,8 @@ body.editing .btn-save   { display: inline-block; }
   편집 모드 — 내용을 수정하고 저장하세요
 </div>
   
-  <div class="label">Profile</div>
-
+<div class="label" id="pageLabel">Profile</div>
+  
   <div class="card">
 
     <!-- 이미지 영역 -->
@@ -396,6 +396,24 @@ body.editing .btn-save   { display: inline-block; }
         </div>
         <span class="placeholder-text">이미지 추가</span>
       </div>
+      <!-- 이미지 변경 오버레이 (image-side 안에 삽입) -->
+<div class="img-overlay" onclick="document.getElementById('imgInput').click()">
+  <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round"
+      d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 18h16.5M3 9h1.5m0 0V7.5A2.25 2.25 0 016.75 5.25h10.5A2.25 2.25 0 0119.5 7.5V9m-15 0h15"/>
+  </svg>
+  <span>이미지 변경</span>
+</div>
+
+<!-- 각 텍스트 필드에 field-label + field-group 래핑 예시 -->
+<div class="field-group" style="margin-bottom:8px">
+  <span class="field-label">영문 이름</span>
+  <input class="edit-input name-en-input" id="nameEn" type="text" value="Kim Soo-yeon" />
+</div>
+
+<!-- 기존 Edit Profile 버튼 옆에 취소/저장 버튼 추가 -->
+<button class="btn btn-cancel" onclick="cancelEdit()">취소</button>
+<button class="btn btn-save" id="saveBtn" onclick="saveEdit()">저장하기</button>
       <input type="file" id="imgInput" accept="image/*" onchange="loadImage(event)" />
       <div class="img-tag" id="imgTag"></div>
     </div>
