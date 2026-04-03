@@ -399,7 +399,7 @@ function spawnPotato() {
   potato.style.animationDelay = (Math.random() * 5) + 's';
   potato.style.opacity = (0.05 + Math.random() * 0.15).toFixed(2);
   document.body.appendChild(potato);
-  // 꾹 누르면 고구마로 변신
+  
    // 꾹 누르면 고구마로 변신
   let holdTimer = null;
   let transformed = false;
@@ -428,6 +428,12 @@ potato.addEventListener('animationend', (e) => {
     if (e.animationName === 'floatPotato') {
       potato.remove();
       spawnPotato();
+    }
+    if (e.animationName === 'turnSweet') {
+      setTimeout(() => {
+        potato.remove();
+        spawnPotato();
+      }, 1000);  // 변신 후 1초 있다가 사라짐
     }
   });
 }
