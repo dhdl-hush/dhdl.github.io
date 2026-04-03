@@ -456,28 +456,42 @@ const firebaseConfig = {
   const db = getFirestore(app);
 
 // [A] 페이지 로드 시 데이터 불러오기
-  window.onload = async () => {
-    const docSnap = await getDoc(doc(db, "web_data", "main_page"));
+window.onload = async () => {
+  try {
+    const docSnap = await getDoc(doc(db, "web_data", "profile_page"));
     if (docSnap.exists()) {
-      // 'edit-area'라는 ID를 가진 요소에 서버 데이터를 집어넣음
-      document.querySelector('#edit-area').innerText = docSnap.data().content;
+      const data = docSnap.data();
+      // 각 input과 textarea에 서버 데이터를 집어넣음
+      if(data.nameEn) document.getElementById('nameEn').value = data.nameEn;
+      if(data.nameKo) document.getElementById('nameKo').value = data.nameKo;
+      if(data.role) document.getElementById('role').value = data.role;
+      if(data.bio) document.getElementById('bio').value = data.bio;
+      // 추가 메타 정보들 (필요하다면 더 추가)
+      if(data.meta0) document.getElementById('meta0').value = data.meta0;
     }
+  } catch (e) { console.error("로드 에러:", e); }
+};
+
+// [B] 저장 기능
+window.saveEdit = async () => {
+  // 화면에 입력된 값들을 싹 긁어모으기
+  const profileData = {
+    nameEn: document.getElementById('nameEn').value,
+    nameKo: document.getElementById('nameKo').value,
+    role: document.getElementById('role').value,
+    bio: document.getElementById('bio').value,
+    meta0: document.getElementById('meta0').value,
+    lastUpdated: new Date()
   };
 
-  // [B] 수정 이벤트 감지 및 저장 기능 (함수로 만들기)
-  // 버튼 등에 onclick="saveData()"를 연결해서 쓸 수 있습니다.
-  window.saveData = async () => {
-    const updatedContent = document.querySelector('#edit-area').innerText; // 수정된 내용 가져오기
-    try {
-      await setDoc(doc(db, "web_data", "main_page"), {
-        content: updatedContent,
-        lastUpdated: new Date()
-      });
-      alert("서버에 성공적으로 저장되었습니다!");
-    } catch (e) {
-      console.error("저장 실패:", e);
-    }
-  };
+  try {
+    await setDoc(doc(db, "web_data", "profile_page"), profileData);
+    alert("서버에 성공적으로 저장되었습니다!");
+  } catch (e) {
+    console.error("저장 실패:", e);
+    alert("저장에 실패했습니다.");
+  }
+};
 
 </script>
 </body>
