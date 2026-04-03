@@ -381,6 +381,8 @@ function spawnPotato() {
   const potato = document.createElement('div');
   potato.classList.add('potato');
   potato.textContent = '🥔';
+  potato.style.left = Math.random() * 100 + 'vw';
+  potato.style.top = Math.random() * 100 + 'vh';
 
   // 랜덤 위치, 크기, 속도
   potato.style.left = Math.random() * 100 + 'vw';
