@@ -478,8 +478,8 @@ window.onload = async () => {
 
       // 2. 이미지 데이터 처리
      if (data.profileImage) {
-  const side = document.getElementById('imageSide');
-  let imgElement = document.getElementById('profile-img');
+      const side = document.getElementById('imageSide');
+      let imgElement = document.getElementById('profile-img');
 
   // img 태그가 없으면 새로 만들기
   if (!imgElement) {
@@ -488,13 +488,16 @@ window.onload = async () => {
     side.insertBefore(imgElement, side.querySelector('.img-overlay'));
   }
 
-  imgElement.src = data.profileImage;
+imgElement.src = data.profileImage;
   imgElement.style.display = 'block';
-
   const placeholder = document.getElementById('placeholder');
   if (placeholder) placeholder.style.display = 'none';
-  }
-};
+        }    // if (data.profileImage) 닫기
+      }      // if (docSnap.exists()) 닫기
+    } catch (e) {
+      console.error("로드 에러:", e);
+    }
+  };  // window.onload 닫기
 // [B] 저장 기능
 window.saveEdit = async () => {
   const profileImg = document.getElementById('profile-img');
