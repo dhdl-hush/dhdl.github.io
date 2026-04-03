@@ -438,7 +438,7 @@
   <script type="module">
   // 1. 필요한 기능들만 가져오기 (SDK 불러오기)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   // 2. 아까 복사한 본인의 설정값을 여기에 붙여넣으세요
 const firebaseConfig = {
