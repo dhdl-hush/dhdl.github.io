@@ -487,6 +487,13 @@ window.saveEdit = async () => {
   try {
     await setDoc(doc(db, "web_data", "profile_page"), profileData);
     alert("서버에 성공적으로 저장되었습니다!");
+  if (typeof cancelEdit === 'function') {
+      cancelEdit(); 
+    } else {
+      // 만약 함수 이름을 모르겠다면, 강제로 새로고침해서 화면을 갱신할 수도 있습니다.
+      location.reload(); 
+    }
+
   } catch (e) {
     console.error("저장 실패:", e);
     alert("저장에 실패했습니다.");
