@@ -495,6 +495,15 @@ window.onload = async () => {
 // [B] 저장 기능
 window.saveEdit = async () => {
   const profileImg = document.getElementById('profile-img');
+
+  let finalImg = profileImg ? profileImg.src : "";
+  if (profileImg && profileImg.src.startsWith('data:image')) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 500; // 가로 크기 강제 축소
+    canvas.height = profileImg.naturalHeight * (500 / profileImg.naturalWidth);
+    canvas.getContext('2d').drawImage(profileImg, 0, 0, canvas.width, canvas.height);
+   finalImg = canvas.toDataURL('image/jpeg', 0.6); 
+  }
   
   // 화면에 입력된 값들을 싹 긁어모으기
   const profileData = {
@@ -506,7 +515,7 @@ window.saveEdit = async () => {
     meta1: document.getElementById('meta1').value,
     meta2: document.getElementById('meta2').value,
     meta3: document.getElementById('meta3').value,
-    profileImage: profileImg && profileImg.src ? profileImg.src : "",
+    profileImage: finalImg,
     lastUpdated: new Date()
   };
 
