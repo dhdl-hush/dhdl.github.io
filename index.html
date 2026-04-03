@@ -365,6 +365,17 @@
 </div>
 
 <script>
+  // 시계
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
   // 감자 생성
 function spawnPotato() {
   const potato = document.createElement('div');
@@ -391,17 +402,6 @@ function spawnPotato() {
 for (let i = 0; i < 10; i++) {
   spawnPotato();
 }
-  
-  // 시계
-  function updateClock() {
-    const now = new Date();
-    const h = String(now.getHours()).padStart(2,'0');
-    const m = String(now.getMinutes()).padStart(2,'0');
-    const s = String(now.getSeconds()).padStart(2,'0');
-    document.getElementById('clock').textContent = `${h}:${m}:${s}`;
-  }
-  updateClock();
-  setInterval(updateClock, 1000);
 </script>
 
 </body>
