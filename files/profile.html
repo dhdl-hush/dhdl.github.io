@@ -496,16 +496,26 @@ window.onload = async () => {
 window.saveEdit = async () => {
   const profileImg = document.getElementById('profile-img');
 
-  let finalImg = profileImg ? profileImg.src : "";
+  // 1. 기본값 설정 (이미지가 없으면 빈 값, 있으면 기존 주소)
+  let finalImg = profileImg && profileImg.src ? profileImg.src : "";
+
+  // 2. 새로 업로드한 이미지(data:image)일 때만 압축 진행
   if (profileImg && profileImg.src.startsWith('data:image')) {
     const canvas = document.createElement('canvas');
-    canvas.width = 500; // 가로 크기 강제 축소
-    canvas.height = profileImg.naturalHeight * (500 / profileImg.naturalWidth);
-    canvas.getContext('2d').drawImage(profileImg, 0, 0, canvas.width, canvas.height);
-   finalImg = canvas.toDataURL('image/jpeg', 0.6); 
+    const ctx = canvas.getContext('2d');
+    
+    // ⭐ [중요] 사진 크기를 못 불러올 경우를 대비해 기본값 500 설정
+    const originWidth = profileImg.naturalWidth || 500;
+    const originHeight = profileImg.naturalHeight || 500;
+    
+    canvas.width = 500; 
+    canvas.height = originHeight * (500 / originWidth);
+
+    ctx.drawImage(profileImg, 0, 0, canvas.width, canvas.height);
+    finalImg = canvas.toDataURL('image/jpeg', 0.6); 
   }
-  
-  // 화면에 입력된 값들을 싹 긁어모으기
+
+  // 3. 데이터 묶기
   const profileData = {
     nameEn: document.getElementById('nameEn').value,
     nameKo: document.getElementById('nameKo').value,
@@ -515,15 +525,14 @@ window.saveEdit = async () => {
     meta1: document.getElementById('meta1').value,
     meta2: document.getElementById('meta2').value,
     meta3: document.getElementById('meta3').value,
-    profileImage: finalImg,
+    profileImage: finalImg, // 압축된 이미지 데이터
     lastUpdated: new Date()
   };
 
-try {
+  try {
     await setDoc(doc(db, "web_data", "profile_page"), profileData);
     alert("서버에 성공적으로 저장되었습니다!");
-      location.reload(); 
-  
+    location.reload(); 
   } catch (e) {
     console.error("저장 실패:", e);
     alert("저장에 실패했습니다.");
