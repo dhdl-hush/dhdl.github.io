@@ -303,23 +303,31 @@
       .tab-nav a { padding: 10px 16px; font-size: 10px; }
     }
     
-    /* ── 떠다니는 감자들 ── */
+/* ── 떠다니는 감자들 ── */
 .potato {
   position: fixed;
   font-size: 2rem;
-  pointer-events: none;
   z-index: 0;
   opacity: 0.15;
   animation: floatPotato linear infinite;
   user-select: none;
+  transition: font-size 0.3s ease, opacity 0.3s ease;  /* ← 여기로 */
 }
 @keyframes floatPotato {
-  from {
-    transform: translateY(110vh) rotate(0deg);
-  }
-  to {
-    transform: translateY(-10vh) rotate(360deg);
-  }
+  from { transform: translateY(110vh) rotate(0deg); }
+  to   { transform: translateY(-10vh) rotate(360deg); }
+}
+.potato.held {
+  opacity: 1 !important;
+  font-size: 4rem !important;
+}
+.potato.transforming {
+  animation: turnSweet 0.6s ease forwards;
+}
+@keyframes turnSweet {
+  0%   { filter: none; }
+  50%  { filter: hue-rotate(30deg) saturate(2); }
+  100% { filter: hue-rotate(60deg) saturate(3); }
 }
   </style>
 </head>
@@ -393,10 +401,33 @@ function spawnPotato() {
 
   document.body.appendChild(potato);
 
+  // 꾹 누르면 고구마로 변신
+  let holdTimer = null;
+
+  potato.addEventListener('pointerdown', () => {
+    potato.classList.add('held');
+    holdTimer = setTimeout(() => {
+      potato.classList.add('transforming');
+      potato.textContent = '🍠';  // 고구마!
+    }, 800);  // 0.8초 누르면 변신
+  });
+
+  potato.addEventListener('pointerup', () => {
+    potato.classList.remove('held');
+    clearTimeout(holdTimer);
+  });
+
+  potato.addEventListener('pointerleave', () => {
+    potato.classList.remove('held');
+    clearTimeout(holdTimer);
+  });
+
   // 애니메이션 끝나면 삭제하고 다시 생성
-  potato.addEventListener('animationend', () => {
-    potato.remove();
-    spawnPotato();
+potato.addEventListener('animationend', (e) => {
+    if (e.animationName === 'floatPotato') {
+      potato.remove();
+      spawnPotato();
+    }
   });
 }
 
