@@ -385,9 +385,49 @@
   updateClock();
   setInterval(updateClock, 1000);
 
-// 감자 생성 function spawnPotato() {   const potato = document.createElement('div');   potato.classList.add('potato');   potato.textContent = '🥔';   potato.style.left = Math.random() * 100 + 'vw';   potato.style.top = Math.random() * 100 + 'vh';   // 랜덤 위치, 크기, 속도   potato.style.left = Math.random() * 100 + 'vw';   potato.style.fontSize = (6.5 + Math.random() * 10.5) + 'rem';   potato.style.animationDuration = (20 + Math.random() * 20) + 's';   potato.style.animationDelay = (Math.random() * 5) + 's';   potato.style.opacity = (0.05 + Math.random() * 0.15).toFixed(2);   document.body.appendChild(potato);   // 꾹 누르면 고구마로 변신   let holdTimer = null;   potato.addEventListener('pointerdown', () => {     potato.classList.add('held');     holdTimer = setTimeout(() => {       potato.classList.add('transforming');       potato.textContent = '🍠';  // 고구마!     }, 200);  // 0.8초 누르면 변신   });   potato.addEventListener('pointerup', () => {     potato.classList.remove('held');     clearTimeout(holdTimer);   });   potato.addEventListener('pointerleave', () => {     potato.classList.remove('held');     clearTimeout(holdTimer);   });   // 애니메이션 끝나면 삭제하고 다시 생성 potato.addEventListener('animationend', (e) => {     if (e.animationName === 'floatPotato') {       potato.remove();       spawnPotato();     }   }); } // 감자 10개 동시에 띄우기 for (let i = 0; i < 10; i++) {   spawnPotato(); }
-
-오히려 이걸로 하면 감자는 정상적으로 보임
+// 감자 생성
+function spawnPotato() {
+  const potato = document.createElement('div');
+  potato.classList.add('potato');
+  potato.textContent = '🥔';
+  potato.style.left = Math.random() * 100 + 'vw';
+  potato.style.top = Math.random() * 100 + 'vh';
+  // 랜덤 위치, 크기, 속도
+  potato.style.left = Math.random() * 100 + 'vw';
+  potato.style.fontSize = (6.5 + Math.random() * 10.5) + 'rem';
+  potato.style.animationDuration = (20 + Math.random() * 20) + 's';
+  potato.style.animationDelay = (Math.random() * 5) + 's';
+  potato.style.opacity = (0.05 + Math.random() * 0.15).toFixed(2);
+  document.body.appendChild(potato);
+  // 꾹 누르면 고구마로 변신
+  let holdTimer = null;
+  potato.addEventListener('pointerdown', () => {
+    potato.classList.add('held');
+    holdTimer = setTimeout(() => {
+      potato.classList.add('transforming');
+      potato.textContent = '🍠';  // 고구마!
+    }, 200);  // 0.8초 누르면 변신
+  });
+  potato.addEventListener('pointerup', () => {
+    potato.classList.remove('held');
+    clearTimeout(holdTimer);
+  });
+  potato.addEventListener('pointerleave', () => {
+    potato.classList.remove('held');
+    clearTimeout(holdTimer);
+  });
+  // 애니메이션 끝나면 삭제하고 다시 생성
+potato.addEventListener('animationend', (e) => {
+    if (e.animationName === 'floatPotato') {
+      potato.remove();
+      spawnPotato();
+    }
+  });
+}
+// 감자 10개 동시에 띄우기
+for (let i = 0; i < 10; i++) {
+  spawnPotato();
+}
 </script>
 
 </body>
