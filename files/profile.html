@@ -306,26 +306,31 @@
 
   <div class="label" id="pageLabel">Profile</div>
 
-  <div class="card">
-    <div class="image-side" id="imageSide">
-      <div class="placeholder" id="placeholder" onclick="document.getElementById('imgInput').click()">
-        <div class="placeholder-icon">
-          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-          </svg>
-        </div>
-        <span class="placeholder-text">이미지 추가</span>
-      </div>
-      <div class="img-overlay" onclick="document.getElementById('imgInput').click()">
+<div class="card">
+  <div class="image-side" id="imageSide">
+    <div class="placeholder" id="placeholder" onclick="document.getElementById('imgInput').click()">
+      <div class="placeholder-icon">
         <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 18h16.5M3 9h1.5m0 0V7.5A2.25 2.25 0 016.75 5.25h10.5A2.25 2.25 0 0119.5 7.5V9m-15 0h15"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
         </svg>
-        <span>이미지 변경</span>
       </div>
-      <input type="file" id="imgInput" accept="image/*" onchange="loadImage(event)" />
-      <div class="img-tag" id="imgTag"></div>
+      <span class="placeholder-text">이미지 추가</span>
     </div>
+
+    <div class="img-overlay" onclick="document.getElementById('imgInput').click()">
+      <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 18h16.5M3 9h1.5m0 0V7.5A2.25 2.25 0 016.75 5.25h10.5A2.25 2.25 0 0119.5 7.5V9m-15 0h15"/>
+      </svg>
+      <span>이미지 변경</span>
+    </div>
+
+    <input type="file" id="imgInput" accept="image/*" onchange="loadImage(event)" />
+
+    <div class="img-tag" id="imgTag">
+      <img id="profile-img" src="" style="width:100%; height:100%; object-fit:cover; display:none;" />
+    </div>
+
+  </div> </div> ```
 
     <div class="info-side">
       <div class="field-group">
@@ -461,22 +466,37 @@ window.onload = async () => {
     const docSnap = await getDoc(doc(db, "web_data", "profile_page"));
     if (docSnap.exists()) {
       const data = docSnap.data();
-      // 각 input과 textarea에 서버 데이터를 집어넣음
+      
+      // 1. 텍스트 데이터 채우기
       if(data.nameEn) document.getElementById('nameEn').value = data.nameEn;
       if(data.nameKo) document.getElementById('nameKo').value = data.nameKo;
       if(data.role) document.getElementById('role').value = data.role;
       if(data.bio) document.getElementById('bio').value = data.bio;
-      // 추가 메타 정보들 (필요하다면 더 추가)
       if(data.meta0) document.getElementById('meta0').value = data.meta0;
-      if (data.meta1) document.getElementById('meta1').value = data.meta1; // 추가 필요
-      if (data.meta2) document.getElementById('meta2').value = data.meta2; // 추가 필요
-      if (data.meta3) document.getElementById('meta3').value = data.meta3; // 추가 필요
-    }
-  } catch (e) { console.error("로드 에러:", e); }
-};
+      if(data.meta1) document.getElementById('meta1').value = data.meta1; 
+      if(data.meta2) document.getElementById('meta2').value = data.meta2; 
+      if(data.meta3) document.getElementById('meta3').value = data.meta3;
 
+      // 2. 이미지 데이터 처리
+      if (data.profileImage) {
+        const imgElement = document.getElementById('profile-img');
+        if (imgElement) {
+          imgElement.src = data.profileImage;
+          imgElement.style.display = 'block'; 
+          
+          const placeholder = document.getElementById('placeholder');
+          if (placeholder) placeholder.style.display = 'none';
+        }
+      } // ✅ if (data.profileImage) 블록 닫기
+    } // ✅ if (docSnap.exists()) 블록 닫기
+  } catch (e) { 
+    console.error("로드 에러:", e); 
+  }
+};
 // [B] 저장 기능
 window.saveEdit = async () => {
+  const profileImg = document.getElementById('profile-img');
+  
   // 화면에 입력된 값들을 싹 긁어모으기
   const profileData = {
     nameEn: document.getElementById('nameEn').value,
@@ -487,13 +507,13 @@ window.saveEdit = async () => {
     meta1: document.getElementById('meta1').value,
     meta2: document.getElementById('meta2').value,
     meta3: document.getElementById('meta3').value,
+    profileImage: profileImg && profileImg.src ? profileImg.src : "",
     lastUpdated: new Date()
   };
 
 try {
     await setDoc(doc(db, "web_data", "profile_page"), profileData);
     alert("서버에 성공적으로 저장되었습니다!");
-
       location.reload(); 
   
   } catch (e) {
