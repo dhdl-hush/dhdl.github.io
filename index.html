@@ -400,14 +400,21 @@ function spawnPotato() {
   potato.style.opacity = (0.05 + Math.random() * 0.15).toFixed(2);
   document.body.appendChild(potato);
   // 꾹 누르면 고구마로 변신
+   // 꾹 누르면 고구마로 변신
   let holdTimer = null;
-  potato.addEventListener('pointerdown', () => {
+  let transformed = false;
+  potato.addEventListener('pointerdown', (e) => {
+    e.stopPropagation();
     potato.classList.add('held');
     holdTimer = setTimeout(() => {
-      potato.classList.add('transforming');
-      potato.textContent = '🍠';  // 고구마!
-    }, 200);  // 0.8초 누르면 변신
+      if (!transformed) {
+        transformed = true;
+        potato.textContent = '🍠';
+        potato.classList.add('transforming');
+      }
+    }, 200);
   });
+  document.body.appendChild(potato);
   potato.addEventListener('pointerup', () => {
     potato.classList.remove('held');
     clearTimeout(holdTimer);
