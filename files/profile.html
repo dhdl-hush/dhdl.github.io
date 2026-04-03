@@ -308,6 +308,7 @@
 
 <div class="card">
   <div class="image-side" id="imageSide">
+
     <div class="placeholder" id="placeholder" onclick="document.getElementById('imgInput').click()">
       <div class="placeholder-icon">
         <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -317,6 +318,9 @@
       <span class="placeholder-text">이미지 추가</span>
     </div>
 
+    <!-- img 태그 — img-tag 밖으로 꺼내고 src="" 삭제 -->
+    <img id="profile-img" style="width:100%; height:100%; object-fit:cover; display:none;" />
+
     <div class="img-overlay" onclick="document.getElementById('imgInput').click()">
       <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 18h16.5M3 9h1.5m0 0V7.5A2.25 2.25 0 016.75 5.25h10.5A2.25 2.25 0 0119.5 7.5V9m-15 0h15"/>
@@ -325,12 +329,9 @@
     </div>
 
     <input type="file" id="imgInput" accept="image/*" onchange="loadImage(event)" />
+    <div class="img-tag" id="imgTag"></div>
 
-    <div class="img-tag" id="imgTag">
-      <img id="profile-img" src="" style="width:100%; height:100%; object-fit:cover; display:none;" />
-    </div>
-  </div> 
-
+  </div>
     <div class="info-side">
       <div class="field-group">
         <span class="field-label">영문 이름</span>
@@ -428,12 +429,14 @@
       const ph = document.getElementById('placeholder');
       const tag = document.getElementById('imgTag');
       if (ph) ph.style.display = 'none';
-      let img = side.querySelector('img');
+      let img = document.getElementById('profile-img');
       if (!img) {
         img = document.createElement('img');
+        img.id = 'profile-img';
         side.insertBefore(img, side.querySelector('.img-overlay'));
       }
       img.src = e.target.result;
+      img.style.display = 'block';
       tag.textContent = file.name.replace(/\.[^.]+$/, '');
     };
     reader.readAsDataURL(file);
