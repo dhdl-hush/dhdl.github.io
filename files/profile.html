@@ -468,6 +468,9 @@ window.onload = async () => {
       if(data.bio) document.getElementById('bio').value = data.bio;
       // 추가 메타 정보들 (필요하다면 더 추가)
       if(data.meta0) document.getElementById('meta0').value = data.meta0;
+      if (data.meta1) document.getElementById('meta1').value = data.meta1; // 추가 필요
+      if (data.meta2) document.getElementById('meta2').value = data.meta2; // 추가 필요
+      if (data.meta3) document.getElementById('meta3').value = data.meta3; // 추가 필요
     }
   } catch (e) { console.error("로드 에러:", e); }
 };
@@ -481,6 +484,9 @@ window.saveEdit = async () => {
     role: document.getElementById('role').value,
     bio: document.getElementById('bio').value,
     meta0: document.getElementById('meta0').value,
+    meta1: document.getElementById('meta1').value,
+    meta2: document.getElementById('meta2').value,
+    meta3: document.getElementById('meta3').value,
     lastUpdated: new Date()
   };
 
