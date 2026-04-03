@@ -429,12 +429,6 @@ potato.addEventListener('animationend', (e) => {
       potato.remove();
       spawnPotato();
     }
-    if (e.animationName === 'turnSweet') {
-      setTimeout(() => {
-        potato.remove();
-        spawnPotato();
-      }, 200);  // 변신 후 1초 있다가 사라짐
-    }
   });
 }
 // 감자 10개 동시에 띄우기
