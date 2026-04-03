@@ -302,6 +302,25 @@
       .hero-title { font-size: 80px; }
       .tab-nav a { padding: 10px 16px; font-size: 10px; }
     }
+    
+    /* ── 떠다니는 감자들 ── */
+.potato {
+  position: fixed;
+  font-size: 2rem;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.15;
+  animation: floatPotato linear infinite;
+  user-select: none;
+}
+@keyframes floatPotato {
+  from {
+    transform: translateY(110vh) rotate(0deg);
+  }
+  to {
+    transform: translateY(-10vh) rotate(360deg);
+  }
+}
   </style>
 </head>
 <body>
@@ -346,6 +365,33 @@
 </div>
 
 <script>
+  // 감자 생성
+function spawnPotato() {
+  const potato = document.createElement('div');
+  potato.classList.add('potato');
+  potato.textContent = '🥔';
+
+  // 랜덤 위치, 크기, 속도
+  potato.style.left = Math.random() * 100 + 'vw';
+  potato.style.fontSize = (1.5 + Math.random() * 2.5) + 'rem';
+  potato.style.animationDuration = (8 + Math.random() * 12) + 's';
+  potato.style.animationDelay = (Math.random() * 5) + 's';
+  potato.style.opacity = (0.05 + Math.random() * 0.15).toFixed(2);
+
+  document.body.appendChild(potato);
+
+  // 애니메이션 끝나면 삭제하고 다시 생성
+  potato.addEventListener('animationend', () => {
+    potato.remove();
+    spawnPotato();
+  });
+}
+
+// 감자 10개 동시에 띄우기
+for (let i = 0; i < 10; i++) {
+  spawnPotato();
+}
+  
   // 시계
   function updateClock() {
     const now = new Date();
