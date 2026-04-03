@@ -435,5 +435,40 @@
     reader.readAsDataURL(file);
   }
 </script>
+  <script type="module">
+  // 1. 필요한 기능들만 가져오기 (SDK 불러오기)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // 2. 아까 복사한 본인의 설정값을 여기에 붙여넣으세요
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "...",
+    appId: "..."
+  };
+
+  // 3. 파이어베이스 및 파이어스토어 초기화
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 확인용 테스트: 데이터 하나 넣어보기 (함수 예시)
+  async function testSave() {
+    try {
+      const docRef = await addDoc(collection(db, "test_collection"), {
+        text: "연결 성공!",
+        time: new Date()
+      });
+      console.log("저장 완료! ID: ", docRef.id);
+    } catch (e) {
+      console.error("에러 발생: ", e);
+    }
+  }
+
+  // 필요한 곳에서 실행
+  // testSave(); 
+</script>
 </body>
 </html>
