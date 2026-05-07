@@ -124,18 +124,18 @@
             }
         }
 
-        function enterSession() {
-            const input = document.getElementById('roleInput').value.trim().toLowerCase();
-            
-            if (input === "") {
-                alert("코드를 입력해야 합니다.");
-                return;
-            }
+       function enterSession() {
+    const input = document.getElementById('roleInput').value.trim();
+    
+    if (input === "") {
+        alert("코드를 입력해야 합니다.");
+        return;
+    }
 
-            // 입력값에 .html을 붙여서 해당 파일로 이동
-            // 예: pc1 입력 시 pc1.html로 이동
-            location.href = input + ".html";
-        }
+    // '폴더이름/' 을 앞에 추가해줍니다.
+    // 예: 폴더 이름이 'scenario' 라면 'scenario/' + input + ".html"
+    'location.href = "게임/location.href = "game/room1/" + input + ".html";
+}
     </script>
 </body>
 </html>
