@@ -1,53 +1,150 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>감자 — 비하인드</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --bg: #f5f2ed; --ink: #1a1714; --muted: #7a7269; --accent: #b8a98a; --line: #ddd8cf; --card: #ffffff; }
-    body { background: var(--bg); color: var(--ink); font-family: 'Noto Sans KR', sans-serif; font-weight: 300; min-height: 100vh; display: flex; justify-content: center; padding: 40px 20px; }
-    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
-    .page { position: relative; z-index: 1; max-width: 720px; width: 100%; animation: fadeUp 0.9s ease both; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-    .tab-nav { display: flex; border-bottom: 1px solid var(--line); margin-bottom: 40px; overflow-x: auto; }
-    .tab-nav::-webkit-scrollbar { display: none; }
-    .tab-nav a { text-decoration: none; font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 10px 18px; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: color 0.2s, border-color 0.2s; }
-    .tab-nav a:hover { color: var(--ink); }
-    .tab-nav a.active { color: var(--ink); border-bottom-color: var(--ink); }
-    .section { margin-bottom: 48px; }
-    .section-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 16px; }
-    .section-number { font-family: 'Cormorant Garamond', serif; font-size: 11px; font-style: italic; color: var(--accent); letter-spacing: 0.05em; flex-shrink: 0; }
-    .section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink); }
-    .section-line { flex: 1; height: 1px; background: var(--line); }
-    .section-body { padding: 20px 0; min-height: 80px; color: var(--muted); font-size: 13.5px; line-height: 1.85; }
-    .placeholder-text { font-size: 11px; color: var(--line); letter-spacing: 0.05em; }
-    .footer { margin-top: 16px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
-    .footer-note { font-size: 11px; color: var(--muted); letter-spacing: 0.05em; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INSANE - PC1</title>
+    <style>
+        body {
+            margin: 0; padding: 0;
+            background-color: #050505; color: #d1d1d1;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        .container {
+            width: 90%; max-width: 600px; margin: 30px auto;
+            padding: 20px; border: 1px solid #222; background: #0a0a0a;
+        }
+
+        h1 { color: #b30000; font-size: 1.5rem; text-align: center; letter-spacing: 5px; }
+
+        /* 주사위 섹션 스타일 */
+        .dice-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px double #444;
+            text-align: center;
+            background: rgba(20, 20, 20, 0.8);
+        }
+
+        .dice-display {
+            display: flex; justify-content: center; gap: 15px; margin-bottom: 15px;
+        }
+
+        .die {
+            width: 50px; height: 50px;
+            background: #1a1a1a; border: 2px solid #b30000;
+            color: #fff; font-size: 1.8rem; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 5px;
+            text-shadow: 0 0 5px #ff0000;
+        }
+
+        #dice-result-text {
+            font-size: 1.2rem; min-height: 1.5rem; margin-bottom: 15px; font-weight: bold;
+        }
+
+        .roll-btn {
+            background: transparent; color: #b30000; border: 1px solid #b30000;
+            padding: 10px 30px; cursor: pointer; font-size: 1rem; letter-spacing: 2px;
+            transition: all 0.2s;
+        }
+
+        .roll-btn:hover { background: #b30000; color: #fff; box-shadow: 0 0 10px #b30000; }
+
+        /* 결과 강조 효과 */
+        .fumble { color: #ff0000; animation: shake 0.2s infinite; text-shadow: 0 0 10px red; }
+        .special { color: #00ffcc; text-shadow: 0 0 10px #00ffcc; }
+        .normal { color: #fff; }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px); }
+            25% { transform: translate(-1px, -2px); }
+            50% { transform: translate(-2px, 1px); }
+            100% { transform: translate(1px, -1px); }
+        }
+
+        /* 기타 스타일 */
+        .status-box { border: 1px solid #333; padding: 10px; text-align: center; margin-bottom: 20px; }
+        .secret-box { 
+            border: 1px solid #b30000; padding: 15px; background: #110000; 
+            cursor: pointer; filter: blur(4px); transition: 0.3s;
+        }
+        .secret-box:hover { filter: blur(0); }
+    </style>
 </head>
 <body>
-<div class="page">
-  <nav class="tab-nav">
-    <a href="/dhdl.github.io/index.html">홈</a>
-    <a href="/dhdl.github.io/files/profile.html">프로필</a>
-    <a href="/dhdl.github.io/files/detail.html">상세정보</a>
-    <a href="/dhdl.github.io/files/story.html">배경이야기</a>
-    <a href="/dhdl.github.io/files/relation.html">관계도</a>
-    <a href="/dhdl.github.io/files/behind.html" class="active">비하인드</a>
-    <a href="/dhdl.github.io/files/gallery.html">갤러리</a>
-  </nav>
-  <div class="section">
-    <div class="section-header">
-      <span class="section-number">01</span>
-      <span class="section-title">비하인드</span>
-      <div class="section-line"></div>
+
+    <div class="container">
+        <h1>PC1: 캐릭터 이름</h1>
+
+        <div class="status-box">
+            <span>생명력 6 / 6</span> | <span>이성치 6 / 6</span>
+        </div>
+
+        <!-- 주사위 판정 영역 -->
+        <div class="dice-section">
+            <div class="dice-display">
+                <div id="die1" class="die">?</div>
+                <div id="die2" class="die">?</div>
+            </div>
+            <div id="dice-result-text">행동 판정을 해주세요.</div>
+            <button class="roll-btn" onclick="rollDice()">주사위 굴리기</button>
+        </div>
+
+        <div class="secret-box">
+            <strong style="color: #ff4d4d;">[비밀]</strong><br>
+            여기에 비밀 내용을 입력하세요. 마우스를 올리면 보입니다.
+        </div>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="../index.html" style="color: #555; text-decoration: none; font-size: 0.8rem;">메인으로 돌아가기</a>
+        </div>
     </div>
-    <div class="section-body"><span class="placeholder-text">여기에 내용을 입력하세요</span></div>
-  </div>
-  <div class="footer"><span class="footer-note">© 2026 · 인물 소개 페이지</span></div>
-</div>
+
+    <script>
+        function rollDice() {
+            const btn = document.querySelector('.roll-btn');
+            const resText = document.getElementById('dice-result-text');
+            const d1Element = document.getElementById('die1');
+            const d2Element = document.getElementById('die2');
+
+            // 버튼 비활성화 (연타 방지)
+            btn.disabled = true;
+            resText.innerHTML = "굴리는 중...";
+            resText.className = "";
+
+            let count = 0;
+            const interval = setInterval(() => {
+                // 애니메이션 효과를 위한 랜덤 숫자
+                d1Element.innerText = Math.floor(Math.random() * 6) + 1;
+                d2Element.innerText = Math.floor(Math.random() * 6) + 1;
+                count++;
+
+                if (count > 10) { // 10회 흔들린 후 멈춤
+                    clearInterval(interval);
+                    
+                    const d1 = Math.floor(Math.random() * 6) + 1;
+                    const d2 = Math.floor(Math.random() * 6) + 1;
+                    const total = d1 + d2;
+
+                    d1Element.innerText = d1;
+                    d2Element.innerText = d2;
+
+                    // 결과 판정
+                    if (total === 2) {
+                        resText.innerHTML = `결과: ${total} - <span class="fumble">펌블 (Fumble)</span>`;
+                    } else if (total === 12) {
+                        resText.innerHTML = `결과: ${total} - <span class="special">스페셜 (Special)</span>`;
+                    } else {
+                        resText.innerHTML = `결과: ${total} - <span class="normal">성공 여부를 확인하세요.</span>`;
+                    }
+
+                    btn.disabled = false;
+                }
+            }, 50);
+        }
+    </script>
 </body>
 </html>
