@@ -2,24 +2,139 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>인세인 접속</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INSANE - 진입로</title>
+    <style>
+        /* 기본 배경 설정: 호러 분위기 */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505; /* 아주 어두운 검정 */
+            color: #d1d1d1;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 중앙 정렬 컨테이너 */
+        .login-container {
+            text-align: center;
+            padding: 50px;
+            border: 1px solid #333;
+            background: linear-gradient(145deg, #0f0f0f, #1a1a1a);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            border-radius: 5px;
+            transition: all 0.5s ease;
+        }
+
+        /* 인세인 타이틀 스타일 */
+        h1 {
+            color: #b30000; /* 피 색상 */
+            font-size: 3.5rem;
+            letter-spacing: 15px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(179, 0, 0, 0.6);
+            animation: flicker 3s infinite;
+        }
+
+        p {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+        }
+
+        /* 입력창 디자인 */
+        input[type="text"] {
+            background: #000;
+            border: none;
+            border-bottom: 2px solid #444;
+            color: #fff;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            width: 250px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"]:focus {
+            border-bottom: 2px solid #b30000;
+        }
+
+        /* 버튼 디자인 */
+        button {
+            background: transparent;
+            color: #b30000;
+            border: 1px solid #b30000;
+            padding: 10px 40px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 3px;
+        }
+
+        button:hover {
+            background: #b30000;
+            color: #fff;
+            box-shadow: 0 0 15px #b30000;
+        }
+
+        /* 간단한 깜빡임 애니메이션 */
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+            20%, 24%, 55% { opacity: 0.4; }
+        }
+
+        /* 안내 문구 */
+        .hint {
+            margin-top: 30px;
+            font-size: 0.7rem;
+            color: #444;
+        }
+    </style>
 </head>
-<body class="flex-center">
-    <div class="login-box">
+<body>
+
+    <div class="login-container">
         <h1>INSANE</h1>
-        <input type="text" id="roleInput" placeholder="파일 이름 입력 (pc1, pc2, gm)">
-        <button onclick="moveToFile()">입장</button>
+        <p>당신에게 할당된 코드를 입력하십시오.</p>
+        
+        <!-- 입력창 -->
+        <input type="text" id="roleInput" placeholder="PC1, PC2, GM..." onkeypress="handleKeyPress(event)">
+        <br>
+        
+        <!-- 입장 버튼 -->
+        <button onclick="enterSession()">입장</button>
+
+        <div class="hint">
+            * 할당받지 않은 코드는 무시됩니다.
+        </div>
     </div>
 
     <script>
-        function moveToFile() {
-            const fileName = document.getElementById('roleInput').value.toLowerCase();
-            if(fileName) {
-                // 입력한 이름.html 파일로 이동
-                // 예: pc1 입력 -> pc1.html로 이동
-                location.href = fileName + ".html";
+        // 엔터키를 눌러도 입장 가능하게 함
+        function handleKeyPress(e) {
+            if (e.keyCode === 13) {
+                enterSession();
             }
+        }
+
+        function enterSession() {
+            const input = document.getElementById('roleInput').value.trim().toLowerCase();
+            
+            if (input === "") {
+                alert("코드를 입력해야 합니다.");
+                return;
+            }
+
+            // 입력값에 .html을 붙여서 해당 파일로 이동
+            // 예: pc1 입력 시 pc1.html로 이동
+            location.href = input + ".html";
         }
     </script>
 </body>
