@@ -2,129 +2,230 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>TRPG 인세인 서포터</title>
+    <title>인세인 온라인 세션 툴</title>
     <style>
-        /* 다크 모드 스타일 (호러 분위기) */
-        body {
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #1e1e1e;
+            --accent-red: #b30000;
+            --text-color: #d1d1d1;
         }
 
-        h1 { color: #b30000; text-shadow: 2px 2px 4px #000; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Apple SD Gothic Neo', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-        .container {
+        /* 홈 화면 (로그인) */
+        #home-screen {
+            text-align: center;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid var(--accent-red);
+            box-shadow: 0 0 20px rgba(179, 0, 0, 0.3);
+        }
+
+        input[type="text"] {
+            background: #000;
+            border: 1px solid var(--accent-red);
+            color: white;
+            padding: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        button {
+            background: var(--accent-red);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { background: #ff0000; transform: scale(1.05); }
+
+        /* 게임 화면 (메인 영역) */
+        #game-screen { display: none; width: 90%; max-width: 1100px; padding: 20px; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent-red);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 2fr;
             gap: 20px;
-            width: 100%;
-            max-width: 1000px;
         }
 
         .card {
-            background: #2d2d2d;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+
+        /* 주사위 및 상태창 */
+        .stat-group { margin: 10px 0; }
+        .stat-group label { display: inline-block; width: 70px; color: var(--accent-red); font-weight: bold; }
+        .stat-group input { width: 50px; background: #000; border: 1px solid #444; color: white; text-align: center; }
+
+        /* 핸드아웃 */
+        .handout-box {
+            background: #fff;
+            color: #222;
             padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #444;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            margin-top: 15px;
+            border-left: 10px solid var(--accent-red);
         }
 
-        /* 주사위 섹션 */
-        .dice-area { text-align: center; margin-bottom: 20px; width: 100%; }
-        button {
-            background: #b30000;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 5px;
-        }
-        button:hover { background: #ff0000; }
-        #dice-result { font-size: 24px; margin-top: 10px; font-weight: bold; }
-
-        /* 캐릭터 상태창 */
-        .stat-input { width: 40px; background: #333; color: #fff; border: 1px solid #555; text-align: center; }
-
-        /* 핸드아웃(비밀) 섹션 */
-        .handout {
-            background: #fdfdfd;
-            color: #333;
-            padding: 10px;
+        .secret-area {
             margin-top: 10px;
-            border-left: 5px solid #b30000;
-            cursor: pointer;
+            padding: 10px;
+            background: #eee;
+            border: 1px dashed #999;
+            display: none;
         }
-        .secret { display: none; background: #ffe6e6; padding: 10px; margin-top: 5px; border-top: 1px dashed #b30000; }
-        .revealed { display: block !important; }
 
-        .label { font-weight: bold; color: #b30000; }
+        .secret-area.show { display: block; background: #ffdada; }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <h1>INSANE SESSION HELPER</h1>
-
-    <!-- 주사위 굴리기 -->
-    <div class="card dice-area">
-        <button onclick="rollDice()">2d6 주사위 굴리기</button>
-        <div id="dice-result">결과: -</div>
+    <!-- 홈 화면 -->
+    <div id="home-screen">
+        <h1 style="color: var(--accent-red); letter-spacing: 5px;">INSANE</h1>
+        <p>당신의 역할(ID)을 입력하세요</p>
+        <p style="font-size: 0.8rem; color: #666;">(테스트용: PC1, PC2, GM 입력)</p>
+        <input type="text" id="roleInput" placeholder="PC1 / PC2 / GM" onkeypress="if(event.keyCode==13) enterGame()">
+        <br>
+        <button onclick="enterGame()">접속하기</button>
     </div>
 
-    <div class="container">
-        <!-- 캐릭터 상태창 -->
-        <div class="card">
-            <h2>캐릭터 상태</h2>
-            <p>이름: <input type="text" placeholder="PC 이름" style="background:#333; color:white; border:1px solid #555;"></p>
-            <p>생명력: <input type="number" class="stat-input" value="6"> / 6</p>
-            <p>이성치: <input type="number" class="stat-input" value="6"> / 6</p>
-            <hr>
-            <h3>광기 카드</h3>
-            <textarea style="width:90%; height:60px; background:#333; color:white;"></textarea>
+    <!-- 게임 플레이 화면 -->
+    <div id="game-screen">
+        <div class="header">
+            <div>접속 중: <span id="display-role" style="color: var(--accent-red); font-weight: bold;">-</span></div>
+            <button onclick="location.reload()" style="padding: 5px 10px; font-size: 0.8rem;">로그아웃</button>
         </div>
 
-        <!-- 핸드아웃 관리 -->
-        <div class="card">
-            <h2>핸드아웃 / 비밀</h2>
-            <div id="handout-container">
-                <!-- 핸드아웃 예시 -->
-                <div class="handout" onclick="toggleSecret(this)">
-                    <div class="label">[사명]</div>
-                    <div>당신은 이 저택에서 살아남아야 합니다.</div>
-                    <div class="secret">
-                        <strong>비밀:</strong> 사실 당신은 이 저택의 주인을 죽이러 온 자객입니다. (진정한 사명: 주인 NPC를 살해한다)
-                    </div>
+        <div class="grid">
+            <!-- 왼쪽: 상태 및 주사위 -->
+            <div class="card">
+                <h3>캐릭터 상태</h3>
+                <div class="stat-group">
+                    <label>생명력</label> <input type="number" value="6"> / 6
+                </div>
+                <div class="stat-group">
+                    <label>이성치</label> <input type="number" value="6"> / 6
+                </div>
+                <hr style="border: 0.5px solid #333;">
+                <div style="text-align: center; margin-top: 20px;">
+                    <div id="dice-result" style="font-size: 1.5rem; margin-bottom: 10px; height: 30px;">-</div>
+                    <button onclick="rollDice()" style="width: 100%;">2d6 판정</button>
                 </div>
             </div>
-            <p style="font-size: 0.8em; color: #888; margin-top:10px;">* 핸드아웃을 클릭하면 비밀이 보입니다.</p>
+
+            <!-- 오른쪽: 사명과 비밀 -->
+            <div class="card">
+                <h3>나의 핸드아웃</h3>
+                <div id="player-handout-area">
+                    <!-- JS에서 데이터가 들어가는 곳 -->
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // 주사위 로직 (사이코로 픽션은 2d6을 사용)
+        // 시나리오 데이터 (여기를 수정해서 시나리오를 준비하면 돼!)
+        const gameData = {
+            "PC1": {
+                name: "탐정",
+                mission: "이 저택에서 일어난 살인사건의 진상을 규명하십시오.",
+                secret: "당신은 사실 범인과 한패입니다. 진상이 드러나지 않게 방해하세요."
+            },
+            "PC2": {
+                name: "기자",
+                mission: "특종을 잡기 위해 저택의 숨겨진 방을 찾으십시오.",
+                secret: "당신은 과거에 이 저택 주인에게 가족을 잃었습니다. 복수가 진짜 목적입니다."
+            },
+            "GM": {
+                name: "게임 마스터",
+                mission: "원활한 진행을 돕고 공포를 선사하세요.",
+                secret: "모든 PC의 비밀을 알고 있습니다. (이것은 GM 전용 화면입니다)"
+            }
+        };
+
+        let currentRole = "";
+
+        function enterGame() {
+            const input = document.getElementById('roleInput').value.toUpperCase();
+            
+            if (gameData[input]) {
+                currentRole = input;
+                document.getElementById('home-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'block';
+                document.getElementById('display-role').innerText = `${input} (${gameData[input].name})`;
+                
+                renderHandout(input);
+            } else {
+                alert("등록되지 않은 역할입니다! (PC1, PC2, GM 중 하나를 입력해)");
+            }
+        }
+
+        function renderHandout(role) {
+            const area = document.getElementById('player-handout-area');
+            const data = gameData[role];
+            
+            area.innerHTML = `
+                <div class="handout-box">
+                    <strong>[사명]</strong><br>
+                    <p>${data.mission}</p>
+                    <button onclick="toggleSecret()" id="secretBtn">비밀 확인 (클릭)</button>
+                    <div id="secret-content" class="secret-area">
+                        <strong>[비밀]</strong><br>
+                        <p>${data.secret}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleSecret() {
+            const secretDiv = document.getElementById('secret-content');
+            const btn = document.getElementById('secretBtn');
+            
+            if (confirm("비밀을 보시겠습니까? 이 작업은 되돌릴 수 없으며 GM에게 기록이 남을 수 있습니다.")) {
+                secretDiv.classList.add('show');
+                btn.style.display = 'none';
+            }
+        }
+
         function rollDice() {
             const d1 = Math.floor(Math.random() * 6) + 1;
             const d2 = Math.floor(Math.random() * 6) + 1;
             const total = d1 + d2;
+            let resText = `${d1} + ${d2} = ${total}`;
+            if (total <= 2) resText += " 💀 펌블!";
+            if (total >= 12) resText += " ⭐ 스페셜!";
             
-            let message = `결과: ${d1} + ${d2} = ${total}`;
-            
-            if (total <= 2) message += " (펌블!)";
-            if (total >= 12) message += " (스페셜!)";
-            
-            document.getElementById('dice-result').innerText = message;
-        }
-
-        // 비밀 보기 토글
-        function toggleSecret(element) {
-            const secret = element.querySelector('.secret');
-            if (confirm("비밀을 확인하시겠습니까? (한 번 확인하면 되돌릴 수 없습니다)")) {
-                secret.classList.toggle('revealed');
-            }
+            document.getElementById('dice-result').innerText = resText;
         }
     </script>
 </body>
