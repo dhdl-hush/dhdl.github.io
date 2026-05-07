@@ -132,9 +132,9 @@
         return;
     }
 
-    // '폴더이름/' 을 앞에 추가해줍니다.
-    // 예: 폴더 이름이 'scenario' 라면 'scenario/' + input + ".html"
-    'location.href = "게임/location.href = "game/room1/" + input + ".html";
+    // 만약 폴더 이름이 'play' 라면 아래 "폴더이름/" 을 "play/" 로 바꾸세요.
+    // 폴더 이름이 진짜로 없다면(같은 위치라면) "폴더이름/" 을 지우고 input + ".html" 만 남기세요.
+    location.href = "files/" + input + ".html";
 }
     </script>
 </body>
