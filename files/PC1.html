@@ -1,53 +1,179 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>감자 — 갤러리</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --bg: #f5f2ed; --ink: #1a1714; --muted: #7a7269; --accent: #b8a98a; --line: #ddd8cf; --card: #ffffff; }
-    body { background: var(--bg); color: var(--ink); font-family: 'Noto Sans KR', sans-serif; font-weight: 300; min-height: 100vh; display: flex; justify-content: center; padding: 40px 20px; }
-    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
-    .page { position: relative; z-index: 1; max-width: 720px; width: 100%; animation: fadeUp 0.9s ease both; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-    .tab-nav { display: flex; border-bottom: 1px solid var(--line); margin-bottom: 40px; overflow-x: auto; }
-    .tab-nav::-webkit-scrollbar { display: none; }
-    .tab-nav a { text-decoration: none; font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 10px 18px; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: color 0.2s, border-color 0.2s; }
-    .tab-nav a:hover { color: var(--ink); }
-    .tab-nav a.active { color: var(--ink); border-bottom-color: var(--ink); }
-    .section { margin-bottom: 48px; }
-    .section-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 16px; }
-    .section-number { font-family: 'Cormorant Garamond', serif; font-size: 11px; font-style: italic; color: var(--accent); letter-spacing: 0.05em; flex-shrink: 0; }
-    .section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink); }
-    .section-line { flex: 1; height: 1px; background: var(--line); }
-    .section-body { padding: 20px 0; min-height: 80px; color: var(--muted); font-size: 13.5px; line-height: 1.85; }
-    .placeholder-text { font-size: 11px; color: var(--line); letter-spacing: 0.05em; }
-    .footer { margin-top: 16px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
-    .footer-note { font-size: 11px; color: var(--muted); letter-spacing: 0.05em; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INSANE - PC1</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: #d1d1d1;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 상단 헤더 */
+        header {
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+            background: rgba(10, 10, 10, 0.9);
+        }
+
+        h1 {
+            color: #b30000;
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            margin: 0;
+        }
+
+        /* 메인 컨텐츠 영역 */
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            border: 1px solid #222;
+            background: #0a0a0a;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 상태 바 (생명력, 이성치) */
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-box {
+            border: 1px solid #444;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .status-label {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .status-value {
+            font-size: 2rem;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        /* 비밀(Secret) 영역 - 인세인의 핵심 */
+        .secret-section {
+            margin-top: 40px;
+            border: 1px solid #b30000;
+            padding: 20px;
+            background: rgba(179, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .secret-title {
+            color: #ff4d4d;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .secret-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            filter: blur(5px); /* 기본적으로 블러 처리 */
+            transition: filter 0.5s;
+            user-select: none;
+        }
+
+        .secret-section:hover .secret-content {
+            filter: blur(0); /* 마우스 올리면 보임 */
+        }
+
+        /* 하단 버튼 */
+        .footer-nav {
+            margin-top: auto;
+            padding: 40px;
+        }
+
+        .back-btn {
+            color: #555;
+            text-decoration: none;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            transition: color 0.3s;
+        }
+
+        .back-btn:hover {
+            color: #b30000;
+        }
+
+        /* 노이즈 효과 애니메이션 */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 9999;
+        }
+    </style>
 </head>
 <body>
-<div class="page">
-  <nav class="tab-nav">
-    <a href="/dhdl.github.io/index.html">홈</a>
-    <a href="/dhdl.github.io/files/profile.html">프로필</a>
-    <a href="/dhdl.github.io/files/detail.html">상세정보</a>
-    <a href="/dhdl.github.io/files/story.html">배경이야기</a>
-    <a href="/dhdl.github.io/files/relation.html">관계도</a>
-    <a href="/dhdl.github.io/files/behind.html">비하인드</a>
-    <a href="/dhdl.github.io/files/gallery.html" class="active">갤러리</a>
-  </nav>
-  <div class="section">
-    <div class="section-header">
-      <span class="section-number">01</span>
-      <span class="section-title">갤러리</span>
-      <div class="section-line"></div>
+
+    <div class="overlay"></div>
+
+    <header>
+        <h1>PC1: [캐릭터 이름]</h1>
+    </header>
+
+    <div class="container">
+        <!-- 기본 정보 -->
+        <div class="status-grid">
+            <div class="status-box">
+                <span class="status-label">생명력</span>
+                <span class="status-value">6 / 6</span>
+            </div>
+            <div class="status-box">
+                <span class="status-label">이성치</span>
+                <span class="status-value">6 / 6</span>
+            </div>
+        </div>
+
+        <!-- 사명 -->
+        <div style="margin-bottom: 30px;">
+            <h3 style="color: #888; font-size: 0.9rem; border-left: 3px solid #b30000; padding-left: 10px;">공개된 사명</h3>
+            <p>당신의 사명은 이 저택에서 무사히 살아나가는 것입니다.</p>
+        </div>
+
+        <!-- 비밀 (마우스를 올리면 보임) -->
+        <div class="secret-section">
+            <div class="secret-title">
+                ⚠️ [비밀: 쇼크 - 정신 오염]
+            </div>
+            <div class="secret-content">
+                사실 당신은 이 저택의 주인을 죽인 범인입니다. <br>
+                당신의 진짜 사명은 자신의 정체가 들키지 않은 채 다른 사람들을 모두 희생시키는 것입니다.
+            </div>
+            <div style="font-size: 0.7rem; color: #444; margin-top: 10px;">
+                * 마우스를 올리면 내용이 보입니다.
+            </div>
+        </div>
     </div>
-    <div class="section-body"><span class="placeholder-text">여기에 내용을 입력하세요</span></div>
-  </div>
-  <div class="footer"><span class="footer-note">© 2026 · 인물 소개 페이지</span></div>
-</div>
+
+    <div class="footer-nav">
+        <a href="../index.html" class="back-btn">메인화면으로 돌아가기</a>
+    </div>
+
 </body>
 </html>
