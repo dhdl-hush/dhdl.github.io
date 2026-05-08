@@ -52,7 +52,7 @@
     <script type="module">
         // 1. 도구는 맨 위에서 한 번만 가져옵니다! (push 추가)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         // 2. 설정값
         const firebaseConfig = {
@@ -81,6 +81,25 @@
                 const pc = data[pcId];
                 const card = document.createElement('div');
                 card.className = `pc-card ${pc.lastDice === 2 ? 'fumble' : ''} ${pc.lastDice === 12 ? 'special' : ''}`;
+              // 인벤토리 목록 HTML 생성
+                let invHtml = '<div style="margin-top:10px; border-top:1px solid #222; padding-top:10px;">';
+                invHtml += '<div style="font-size:0.8rem; color:#888; margin-bottom:5px;">보유 인벤토리:</div>';
+                
+                if (pc.inventory) {
+                    for (let itemId in pc.inventory) {
+                        const item = pc.inventory[itemId];
+                        invHtml += `
+                            <div style="display:flex; justify-content:space-between; background:#111; padding:5px; margin-bottom:3px; font-size:0.8rem;">
+                                <span>- ${item.title}</span>
+                                <button onclick="deleteItem('${pcId}', '${itemId}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer; padding:0 5px;">[삭제]</button>
+                            </div>
+                        `;
+                    }
+                } else {
+                    invHtml += '<div style="font-size:0.8rem; color:#444;">비어 있음</div>';
+                }
+                invHtml += '</div>';
+
                 card.innerHTML = `
                     <div class="pc-name">${pcId.toUpperCase()} : ${pc.name || '미설정'}</div>
                     <div class="stat-line"><span>생명력</span> <span class="stat-val">${pc.hp || 6} / 6</span></div>
@@ -88,6 +107,7 @@
                     <div class="dice-box">
                         <div class="dice-num">${pc.lastDice || '?'}</div>
                     </div>
+                    ${invHtml}
                 `;
                 pcContainer.appendChild(card);
             }
@@ -110,6 +130,16 @@
                 document.getElementById('ho-title').value = "";
                 document.getElementById('ho-content').value = "";
             });
+        }
+
+        // 아이템 삭제 함수
+        window.deleteItem = function(pcId, itemId) {
+            if(confirm("이 아이템을 PC의 인벤토리에서 삭제할까요?")) {
+                const itemRef = ref(db, `room_01/${pcId}/inventory/${itemId}`);
+                remove(itemRef).then(() => {
+                    alert("삭제되었습니다.");
+                });
+            }
         }
     </script>
 </body>
