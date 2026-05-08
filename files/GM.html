@@ -1,53 +1,34 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>감자 — 관계도</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --bg: #f5f2ed; --ink: #1a1714; --muted: #7a7269; --accent: #b8a98a; --line: #ddd8cf; --card: #ffffff; }
-    body { background: var(--bg); color: var(--ink); font-family: 'Noto Sans KR', sans-serif; font-weight: 300; min-height: 100vh; display: flex; justify-content: center; padding: 40px 20px; }
-    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
-    .page { position: relative; z-index: 1; max-width: 720px; width: 100%; animation: fadeUp 0.9s ease both; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-    .tab-nav { display: flex; border-bottom: 1px solid var(--line); margin-bottom: 40px; overflow-x: auto; }
-    .tab-nav::-webkit-scrollbar { display: none; }
-    .tab-nav a { text-decoration: none; font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 10px 18px; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: color 0.2s, border-color 0.2s; }
-    .tab-nav a:hover { color: var(--ink); }
-    .tab-nav a.active { color: var(--ink); border-bottom-color: var(--ink); }
-    .section { margin-bottom: 48px; }
-    .section-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 16px; }
-    .section-number { font-family: 'Cormorant Garamond', serif; font-size: 11px; font-style: italic; color: var(--accent); letter-spacing: 0.05em; flex-shrink: 0; }
-    .section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink); }
-    .section-line { flex: 1; height: 1px; background: var(--line); }
-    .section-body { padding: 20px 0; min-height: 80px; color: var(--muted); font-size: 13.5px; line-height: 1.85; }
-    .placeholder-text { font-size: 11px; color: var(--line); letter-spacing: 0.05em; }
-    .footer { margin-top: 16px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
-    .footer-note { font-size: 11px; color: var(--muted); letter-spacing: 0.05em; }
-  </style>
-</head>
-<body>
-<div class="page">
-  <nav class="tab-nav">
-    <a href="/dhdl.github.io/index.html">홈</a>
-    <a href="/dhdl.github.io/files/profile.html">프로필</a>
-    <a href="/dhdl.github.io/files/detail.html">상세정보</a>
-    <a href="/dhdl.github.io/files/story.html">배경이야기</a>
-    <a href="/dhdl.github.io/files/relation.html" class="active">관계도</a>
-    <a href="/dhdl.github.io/files/behind.html">비하인드</a>
-    <a href="/dhdl.github.io/files/gallery.html">갤러리</a>
-  </nav>
-  <div class="section">
-    <div class="section-header">
-      <span class="section-number">01</span>
-      <span class="section-title">관계도</span>
-      <div class="section-line"></div>
-    </div>
-    <div class="section-body"><span class="placeholder-text">여기에 내용을 입력하세요</span></div>
-  </div>
-  <div class="footer"><span class="footer-note">© 2026 · 인물 소개 페이지</span></div>
+<!-- GM 대시보드 구조 -->
+<div id="pc-container" style="display: flex; gap: 20px;">
+    <!-- 여기에 PC들의 카드가 실시간으로 생성됨 -->
 </div>
-</body>
-</html>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = { /* 본인의 설정값 */ };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const pcContainer = document.getElementById('pc-container');
+
+    // 데이터베이스 감시
+    onValue(ref(db, 'room_01'), (snapshot) => {
+        const data = snapshot.val();
+        pcContainer.innerHTML = ""; // 화면 초기화 후 다시 그리기
+
+        for (let pcId in data) {
+            const pc = data[pcId];
+            const card = `
+                <div class="pc-card" style="border: 1px solid ${pc.lastDice === 2 ? 'red' : '#333'}; padding: 15px; background: #111; color: white;">
+                    <h3>${pcId.toUpperCase()} (${pc.name})</h3>
+                    <p>생명력: ${pc.hp} | 이성치: ${pc.san}</p>
+                    <p style="font-size: 1.5rem;">최근 주사위: <strong>${pc.lastDice}</strong></p>
+                    ${pc.lastDice === 2 ? '<b style="color:red;">⚠️ 펌블 발생!</b>' : ''}
+                </div>
+            `;
+            pcContainer.innerHTML += card;
+        }
+    });
+</script>
