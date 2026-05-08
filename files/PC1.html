@@ -248,6 +248,41 @@
         </div>
     </div>
 
+    <!-- 파이어베이스 연결용 스크립트 -->
+<script type="module">
+  // 파이어베이스 라이브러리 불러오기 (CDN)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+  // 1단계에서 복사한 본인의 설정값을 여기에 붙여넣으세요
+const firebaseConfig = {
+  apiKey: "AIzaSyAUjW1D8bQ_P1o0GQpSo2zAswwA7SvT97I",
+  authDomain: "dhdl-48b4a.firebaseapp.com",
+  projectId: "dhdl-48b4a",
+  storageBucket: "dhdl-48b4a.firebasestorage.app",
+  messagingSenderId: "970954764585",
+  appId: "1:970954764585:web:7388d241cc77ec70dd8738",
+  measurementId: "G-DV6XRPBJV4"
+};
+
+  // 파이어베이스 초기화
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // --- 연결 테스트용 코드 ---
+  // 페이지가 열리면 서버에 "연결됨"이라는 신호를 보냅니다.
+  // 'room_01/pc1/status' 위치에 값을 저장합니다.
+  set(ref(db, 'room_01/pc1'), {
+    name: "캐릭터 이름",
+    status: "접속 중",
+    lastUpdate: Date.now()
+  }).then(() => {
+    console.log("파이어베이스 연결 성공!");
+  }).catch((error) => {
+    console.error("연결 실패:", error);
+  });
+</script>
+
     <div class="footer-nav">
         <a href="../index.html" class="back-btn">메인화면으로 돌아가기</a>
     </div>
