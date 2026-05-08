@@ -24,6 +24,15 @@
         .secret-box { margin-top: 20px; border: 1px solid #b30000; padding: 15px; background: rgba(179,0,0,0.1); cursor: help; }
         .secret-content { filter: blur(5px); transition: 0.3s; }
         .secret-box:hover .secret-content { filter: blur(0); }
+
+        .fumble { color: #ff0000 !important; font-weight: bold; animation: shake 0.2s infinite; display: inline-block; }
+.special { color: #00ffcc !important; font-weight: bold; text-shadow: 0 0 10px #00ffcc; }
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px); }
+    50% { transform: translate(-1px, -2px); }
+    100% { transform: translate(1px, -1px); }
+}
     </style>
 </head>
 <body>
@@ -45,11 +54,18 @@
             <button id="roll-btn" class="roll-btn">ROLL DICE</button>
         </div>
 
-        <div class="secret-box">
+              <!-- 3. 사명 -->
+        <div style="margin-bottom: 30px;">
+            <h3 style="color: #888; font-size: 0.9rem; border-left: 3px solid #b30000; padding-left: 10px;">공개된 사명</h3>
+            <p>당신의 사명은 이 저택에서 무사히 살아나가는 것입니다.</p>
+        </div>
+
+  <div class="secret-box">
             <strong>[비밀]</strong>
             <div class="secret-content">여기에 캐릭터의 비밀 내용을 입력하세요.</div>
         </div>
     </div>
+
 
     <!-- 파이어베이스 로직 -->
     <script type="module">
@@ -91,7 +107,14 @@
                     
                     document.getElementById('die1').innerText = final1;
                     document.getElementById('die2').innerText = final2;
-                    document.getElementById('dice-result').innerText = "결과: " + total;
+                    const resBox = document.getElementById('dice-result');
+    if (total === 2) {
+        resBox.innerHTML = `결과: ${total} - <span class="fumble">펌블 (Fumble)</span>`;
+    } else if (total === 12) {
+        resBox.innerHTML = `결과: ${total} - <span class="special">스페셜 (Special)</span>`;
+    } else {
+        resBox.innerHTML = `결과: ${total} - <span>성공 여부를 확인하세요.</span>`;
+    }
 
                     // 파이어베이스로 데이터 전송
                     update(ref(db, 'room_01/pc3'), {
