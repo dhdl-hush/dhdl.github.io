@@ -26,13 +26,13 @@
         .secret-box:hover .secret-content { filter: blur(0); }
 
         .fumble { color: #ff0000 !important; font-weight: bold; animation: shake 0.2s infinite; display: inline-block; }
-.special { color: #00ffcc !important; font-weight: bold; text-shadow: 0 0 10px #00ffcc; }
+        .special { color: #00ffcc !important; font-weight: bold; text-shadow: 0 0 10px #00ffcc; }
 
-@keyframes shake {
-    0% { transform: translate(1px, 1px); }
-    50% { transform: translate(-1px, -2px); }
-    100% { transform: translate(1px, -1px); }
-}
+        @keyframes shake {
+            0% { transform: translate(1px, 1px); }
+            50% { transform: translate(-1px, -2px); }
+            100% { transform: translate(1px, -1px); }
+        }
     </style>
 </head>
 <body>
@@ -40,11 +40,13 @@
     <header><h1>PC1 SHEET</h1></header>
 
     <div class="container">
+        <!-- 상태 수치 -->
         <div class="status-grid">
             <div class="status-box"><div>생명력</div><div class="status-value">6/6</div></div>
             <div class="status-box"><div>이성치</div><div class="status-value">6/6</div></div>
         </div>
 
+        <!-- 주사위 판정 -->
         <div class="dice-section">
             <div class="dice-display">
                 <div id="die1" class="die">?</div>
@@ -54,43 +56,43 @@
             <button id="roll-btn" class="roll-btn">ROLL DICE</button>
         </div>
 
-              <!-- 3. 사명 -->
-        <div style="margin-bottom: 30px;">
-            <h3 style="color: #888; font-size: 0.9rem; border-left: 3px solid #b30000; padding-left: 10px;">공개된 사명</h3>
+        <!-- 사명 -->
+        <div style="margin-bottom: 30px; border-left: 3px solid #b30000; padding-left: 15px;">
+            <h3 style="color: #888; font-size: 0.9rem;">공개된 사명</h3>
             <p>당신의 사명은 이 저택에서 무사히 살아나가는 것입니다.</p>
         </div>
 
-  <div class="secret-box">
+        <!-- 비밀 -->
+        <div class="secret-box">
             <strong>[비밀]</strong>
             <div class="secret-content">여기에 캐릭터의 비밀 내용을 입력하세요.</div>
         </div>
     </div>
 
-    <!-- 인벤토리 버튼 및 구역 -->
-<div class="container" style="margin-top: 20px;">
-    <h3 style="color: #b30000; border-bottom: 1px solid #333;">인벤토리 (핸드아웃)</h3>
-    <div id="inventory-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-        <!-- 아이템이 여기 추가됨 -->
-        <p style="color: #666; font-size: 0.9rem;">획득한 아이템이 없습니다.</p>
+    <!-- 인벤토리 -->
+    <div class="container" style="margin-top: 20px;">
+        <h3 style="color: #b30000; border-bottom: 1px solid #333;">인벤토리 (핸드아웃)</h3>
+        <div id="inventory-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+            <p style="color: #666; font-size: 0.9rem;">획득한 아이템이 없습니다.</p>
+        </div>
     </div>
-</div>
 
-<!-- 실시간 획득 알림 팝업 (기본 숨김) -->
-<div id="handout-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#1a1a1a; border:2px solid #b30000; padding:30px; z-index:10000; box-shadow:0 0 50px #000; max-width:80%; text-align:center;">
-    <h2 style="color:#ff4d4d; margin-top:0;">📜 새로운 핸드아웃!</h2>
-    <h3 id="modal-title" style="color:#fff;"></h3>
-    <p id="modal-content" style="color:#ccc; line-height:1.6;"></p>
-    <button onclick="closeHandout()" style="background:#b30000; color:#fff; border:none; padding:10px 20px; cursor:pointer; margin-top:20px;">확인</button>
-</div>
+    <!-- 핸드아웃 팝업 모달 -->
+    <div id="handout-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#1a1a1a; border:2px solid #b30000; padding:30px; z-index:10000; box-shadow:0 0 50px #000; width:80%; max-width:400px; text-align:center;">
+        <h2 style="color:#ff4d4d; margin-top:0;">📜 새로운 핸드아웃!</h2>
+        <h3 id="modal-title" style="color:#fff;"></h3>
+        <p id="modal-content" style="color:#ccc; line-height:1.6; white-space: pre-wrap;"></p>
+        <button onclick="closeHandout()" style="background:#b30000; color:#fff; border:none; padding:10px 20px; cursor:pointer; margin-top:20px;">확인</button>
+    </div>
 
-
-    <!-- 파이어베이스 로직 -->
+    <!-- 파이어베이스 로직 (통합 버전) -->
     <script type="module">
+        // 1. 도구들을 하나로 합쳐서 가져오기
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, update, onValue, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // ⚠️ 이 부분을 본인의 콘솔 값으로 정확히 채우세요!
-       const firebaseConfig = {
+        // ⚠️ 본인의 콘솔 값으로 채우세요!
+        const firebaseConfig = {
           apiKey: "AIzaSyAUjW1D8bQ_P1o0GQpSo2zAswwA7SvT97I",
           authDomain: "dhdl-48b4a.firebaseapp.com",
           projectId: "dhdl-48b4a",
@@ -103,88 +105,70 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // --- 기능 1: 주사위 굴리기 ---
         const btn = document.getElementById('roll-btn');
-        
         btn.addEventListener('click', () => {
             btn.disabled = true;
             let count = 0;
-            
             const timer = setInterval(() => {
-                const d1 = Math.floor(Math.random() * 6) + 1;
-                const d2 = Math.floor(Math.random() * 6) + 1;
-                document.getElementById('die1').innerText = d1;
-                document.getElementById('die2').innerText = d2;
+                document.getElementById('die1').innerText = Math.floor(Math.random() * 6) + 1;
+                document.getElementById('die2').innerText = Math.floor(Math.random() * 6) + 1;
                 count++;
-
                 if(count > 10) {
                     clearInterval(timer);
-                    const final1 = Math.floor(Math.random() * 6) + 1;
-                    const final2 = Math.floor(Math.random() * 6) + 1;
-                    const total = final1 + final2;
+                    const f1 = Math.floor(Math.random() * 6) + 1;
+                    const f2 = Math.floor(Math.random() * 6) + 1;
+                    const total = f1 + f2;
+                    document.getElementById('die1').innerText = f1;
+                    document.getElementById('die2').innerText = f2;
                     
-                    document.getElementById('die1').innerText = final1;
-                    document.getElementById('die2').innerText = final2;
                     const resBox = document.getElementById('dice-result');
-    if (total === 2) {
-        resBox.innerHTML = `결과: ${total} - <span class="fumble">펌블 (Fumble)</span>`;
-    } else if (total === 12) {
-        resBox.innerHTML = `결과: ${total} - <span class="special">스페셜 (Special)</span>`;
-    } else {
-        resBox.innerHTML = `결과: ${total} - <span>성공 여부를 확인하세요.</span>`;
-    }
+                    if (total === 2) resBox.innerHTML = `결과: ${total} - <span class="fumble">펌블!</span>`;
+                    else if (total === 12) resBox.innerHTML = `결과: ${total} - <span class="special">스페셜!</span>`;
+                    else resBox.innerHTML = `결과: ${total} - <span>판정 완료</span>`;
 
-                    // 파이어베이스로 데이터 전송
-                    update(ref(db, 'room_01/pc1'), {
-                        name: "플레이어1",
-                        lastDice: total,
-                        hp: 6,
-                        san: 6
-                    }).then(() => {
-                        console.log("GM에게 전송 완료!");
-                    }).catch(e => console.error("전송 에러:", e));
-
+                    update(ref(db, 'room_01/pc1'), { lastDice: total, name: "플레이어1", hp: 6, san: 6 });
                     btn.disabled = false;
                 }
             }, 50);
         });
 
-        import { getDatabase, ref, onValue, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        // --- 기능 2: 핸드아웃 수신 및 인벤토리 ---
+        const invRef = ref(db, 'room_01/pc1/inventory');
+        let isInitialLoad = true;
 
-// 인벤토리 실시간 감시 (새 아이템이 들어오면 실행)
-const invRef = ref(db, 'room_01/pc1/inventory');
+        // 첫 로딩인지 체크
+        onValue(invRef, () => { isInitialLoad = false; }, { onlyOnce: true });
 
-// 페이지 로드 후 처음부터 있는 것 외에 "새로 추가"될 때만 팝업 띄우기 위한 변수
-let isInitialLoad = true;
-onValue(invRef, () => { isInitialLoad = false; }, { onlyOnce: true });
+        // 새 아이템(핸드아웃)이 추가될 때마다 실행
+        onChildAdded(invRef, (snapshot) => {
+            const item = snapshot.val();
+            const list = document.getElementById('inventory-list');
+            if(list.querySelector('p')) list.innerHTML = "";
 
-onChildAdded(invRef, (data) => {
-    const item = data.val();
-    
-    // 1. 인벤토리 목록 업데이트
-    const list = document.getElementById('inventory-list');
-    if(list.querySelector('p')) list.innerHTML = ""; // '비어있음' 메시지 삭제
-    
-    const itemDiv = document.createElement('div');
-    itemDiv.style = "background:#111; border:1px solid #333; padding:10px; cursor:pointer;";
-    itemDiv.innerHTML = `<strong>${item.title}</strong>`;
-    itemDiv.onclick = () => showHandout(item.title, item.content); // 클릭하면 다시보기
-    list.appendChild(itemDiv);
+            // 목록에 추가
+            const itemDiv = document.createElement('div');
+            itemDiv.style = "background:#111; border:1px solid #333; padding:10px; cursor:pointer; margin-bottom:5px;";
+            itemDiv.innerHTML = `<strong>${item.title}</strong>`;
+            itemDiv.onclick = () => window.showHandout(item.title, item.content);
+            list.appendChild(itemDiv);
 
-    // 2. 실시간 알림 팝업 (처음 로딩할 때가 아닐 때만)
-    if (!isInitialLoad) {
-        showHandout(item.title, item.content);
-    }
-});
+            // 실시간 팝업 (페이지 처음 열 때가 아닐 때만)
+            if (!isInitialLoad) {
+                window.showHandout(item.title, item.content);
+            }
+        });
 
-function showHandout(title, content) {
-    document.getElementById('modal-title').innerText = title;
-    document.getElementById('modal-content').innerText = content;
-    document.getElementById('handout-modal').style.display = "block";
-}
+        // --- 전역 함수 설정 (버튼 클릭 인식용) ---
+        window.showHandout = function(title, content) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-content').innerText = content;
+            document.getElementById('handout-modal').style.display = "block";
+        }
 
-window.closeHandout = function() {
-    document.getElementById('handout-modal').style.display = "none";
-}
+        window.closeHandout = function() {
+            document.getElementById('handout-modal').style.display = "none";
+        }
     </script>
 </body>
 </html>
