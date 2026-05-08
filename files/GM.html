@@ -5,63 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>INSANE - GM DASHBOARD</title>
     <style>
+        /* [스타일 태그 안에는 디자인 규칙만 적습니다] */
         body { margin: 0; padding: 20px; background: #050505; color: #d1d1d1; font-family: sans-serif; }
         h1 { color: #b30000; text-align: center; border-bottom: 2px solid #b30000; padding-bottom: 10px; }
-        
-        /* PC 카드들이 나열될 그리드 */
-        #pc-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        /* 각 PC 상태 카드 디자인 */
-        .pc-card {
-            border: 1px solid #333;
-            background: #0a0a0a;
-            padding: 20px;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-
+        #pc-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px; }
+        .pc-card { border: 1px solid #333; background: #0a0a0a; padding: 20px; border-radius: 8px; transition: all 0.3s; }
         .pc-name { font-size: 1.2rem; color: #fff; margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 5px; }
-        
         .stat-line { margin: 5px 0; font-size: 0.9rem; display: flex; justify-content: space-between; }
         .stat-val { font-weight: bold; color: #ff4d4d; }
-
-        .dice-box {
-            margin-top: 15px;
-            padding: 10px;
-            background: #1a1a1a;
-            text-align: center;
-            border: 1px solid #b30000;
-        }
+        .dice-box { margin-top: 15px; padding: 10px; background: #1a1a1a; text-align: center; border: 1px solid #b30000; }
         .dice-num { font-size: 2rem; font-weight: bold; color: #fff; }
-
-        /* 상태 이상 효과 */
         .fumble { border-color: red !important; box-shadow: 0 0 15px red; animation: shake 0.3s infinite; }
         .special { border-color: #00ffcc !important; box-shadow: 0 0 15px #00ffcc; }
-
-        @keyframes shake {
-            0% { transform: translate(1px, 1px); }
-            50% { transform: translate(-1px, -1px); }
-            100% { transform: translate(1px, -1px); }
-        }
-
-        <div style="margin-top: 50px; border: 1px solid #b30000; padding: 20px; background: #0a0a0a;">
-    <h2 style="color: #b30000;">핸드아웃 전송</h2>
-    <input type="text" id="ho-title" placeholder="제목 (예: 오래된 열쇠)" style="width: 100%; padding: 10px; margin-bottom: 10px;">
-    <textarea id="ho-content" placeholder="내용을 입력하세요..." style="width: 100%; height: 100px; padding: 10px; margin-bottom: 10px;"></textarea>
-    
-    <div>
-        전송 대상: 
-        <button onclick="sendHandout('pc1')">PC1</button>
-        <button onclick="sendHandout('pc2')">PC2</button>
-        <button onclick="sendHandout('pc3')">PC3</button>
-        <button onclick="sendHandout('pc4')">PC4</button>
-    </div>
-</div>
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, -1px); } }
+        
+        /* 핸드아웃 전송창 전용 디자인 */
+        .handout-sender { margin-top: 50px; border: 1px solid #b30000; padding: 20px; background: #0a0a0a; }
+        .handout-sender input, .handout-sender textarea { width: 100%; padding: 10px; margin-bottom: 10px; background: #111; color: white; border: 1px solid #333; box-sizing: border-box; }
+        .handout-sender button { background: #b30000; color: white; border: none; padding: 10px 15px; cursor: pointer; margin-right: 5px; }
+        .handout-sender button:hover { background: #ff0000; }
     </style>
 </head>
 <body>
@@ -69,16 +31,30 @@
     <h1>GM 모니터링 시스템</h1>
     <div id="connection-status" style="text-align: center; font-size: 0.8rem; color: #666;">연결 시도 중...</div>
 
-    <div id="pc-container">
-        <!-- 파이어베이스 데이터가 여기에 실시간으로 들어옵니다 -->
+    <!-- PC 상태 카드들이 보일 곳 -->
+    <div id="pc-container"></div>
+
+    <!-- [여기로 옮겨왔습니다!] 핸드아웃 전송창 UI -->
+    <div class="handout-sender">
+        <h2 style="color: #b30000;">핸드아웃 전송</h2>
+        <input type="text" id="ho-title" placeholder="제목 (예: 오래된 열쇠)">
+        <textarea id="ho-content" placeholder="내용을 입력하세요..."></textarea>
+        <div>
+            전송 대상: 
+            <button onclick="sendHandout('pc1')">PC1</button>
+            <button onclick="sendHandout('pc2')">PC2</button>
+            <button onclick="sendHandout('pc3')">PC3</button>
+            <button onclick="sendHandout('pc4')">PC4</button>
+        </div>
     </div>
 
-    <!-- 파이어베이스 SDK 연결 (반드시 type="module" 이어야 함) -->
+    <!-- 스크립트 시작 -->
     <script type="module">
+        // 1. 도구는 맨 위에서 한 번만 가져옵니다! (push 추가)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // ⚠️ 주의: 본인의 firebaseConfig로 반드시 교체하세요!
+        // 2. 설정값
         const firebaseConfig = {
           apiKey: "AIzaSyAUjW1D8bQ_P1o0GQpSo2zAswwA7SvT97I",
           authDomain: "dhdl-48b4a.firebaseapp.com",
@@ -89,72 +65,52 @@
           measurementId: "G-DV6XRPBJV4"
         };
 
-        // 초기화
+        // 3. 초기화 (한 번만!)
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const pcContainer = document.getElementById('pc-container');
         const statusText = document.getElementById('connection-status');
 
-        // room_01 노드의 데이터 감시 시작
-        const roomRef = ref(db, 'room_01');
-        
-        onValue(roomRef, (snapshot) => {
-            statusText.innerText = "데이터 실시간 동기화 중 (마지막 업데이트: " + new Date().toLocaleTimeString() + ")";
+        // 4. [기능] PC 상태 실시간 감시
+        onValue(ref(db, 'room_01'), (snapshot) => {
+            statusText.innerText = "데이터 실시간 동기화 중 (" + new Date().toLocaleTimeString() + ")";
             const data = snapshot.val();
-            
-            if (!data) {
-                pcContainer.innerHTML = "<p style='text-align:center;'>접속된 PC가 없거나 데이터가 없습니다.</p>";
-                return;
-            }
-
-            pcContainer.innerHTML = ""; // 화면 초기화
-
-            // PC별로 카드 생성
+            if (!data) { pcContainer.innerHTML = "접속 데이터 없음"; return; }
+            pcContainer.innerHTML = ""; 
             for (let pcId in data) {
                 const pc = data[pcId];
-                const isFumble = pc.lastDice === 2;
-                const isSpecial = pc.lastDice === 12;
-
                 const card = document.createElement('div');
-                card.className = `pc-card ${isFumble ? 'fumble' : ''} ${isSpecial ? 'special' : ''}`;
-                
+                card.className = `pc-card ${pc.lastDice === 2 ? 'fumble' : ''} ${pc.lastDice === 12 ? 'special' : ''}`;
                 card.innerHTML = `
                     <div class="pc-name">${pcId.toUpperCase()} : ${pc.name || '미설정'}</div>
                     <div class="stat-line"><span>생명력</span> <span class="stat-val">${pc.hp || 6} / 6</span></div>
                     <div class="stat-line"><span>이성치</span> <span class="stat-val">${pc.san || 6} / 6</span></div>
                     <div class="dice-box">
-                        <div style="font-size: 0.7rem; color: #888;">최근 판정 결과</div>
                         <div class="dice-num">${pc.lastDice || '?'}</div>
-                        <div style="font-size: 0.8rem;">${isFumble ? '펌블!' : isSpecial ? '스페셜!' : '성공여부 확인'}</div>
                     </div>
                 `;
                 pcContainer.appendChild(card);
             }
-        }, (error) => {
-            console.error("데이터 읽기 실패:", error);
-            statusText.innerText = "오류 발생: " + error.message;
         });
 
-        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        // 5. [기능] 핸드아웃 전송 함수 (window에 연결해야 버튼이 인식함)
+        window.sendHandout = function(pcId) {
+            const title = document.getElementById('ho-title').value;
+            const content = document.getElementById('ho-content').value;
 
-window.sendHandout = function(pcId) {
-    const title = document.getElementById('ho-title').value;
-    const content = document.getElementById('ho-content').value;
+            if(!title || !content) return alert("제목과 내용을 입력하세요.");
 
-    if(!title || !content) return alert("제목과 내용을 입력하세요.");
-
-    // 해당 PC의 inventory 노드에 데이터 추가
-    const targetRef = ref(db, `room_01/${pcId}/inventory`);
-    push(targetRef, {
-        title: title,
-        content: content,
-        timestamp: Date.now()
-    }).then(() => {
-        alert(`${pcId}에게 핸드아웃을 보냈습니다.`);
-        document.getElementById('ho-title').value = "";
-        document.getElementById('ho-content').value = "";
-    });
-}
+            const targetRef = ref(db, `room_01/${pcId}/inventory`);
+            push(targetRef, {
+                title: title,
+                content: content,
+                timestamp: Date.now()
+            }).then(() => {
+                alert(`${pcId.toUpperCase()}에게 전송했습니다.`);
+                document.getElementById('ho-title').value = "";
+                document.getElementById('ho-content').value = "";
+            });
+        }
     </script>
 </body>
 </html>
