@@ -66,6 +66,23 @@
         </div>
     </div>
 
+    <!-- 인벤토리 버튼 및 구역 -->
+<div class="container" style="margin-top: 20px;">
+    <h3 style="color: #b30000; border-bottom: 1px solid #333;">인벤토리 (핸드아웃)</h3>
+    <div id="inventory-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+        <!-- 아이템이 여기 추가됨 -->
+        <p style="color: #666; font-size: 0.9rem;">획득한 아이템이 없습니다.</p>
+    </div>
+</div>
+
+<!-- 실시간 획득 알림 팝업 (기본 숨김) -->
+<div id="handout-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#1a1a1a; border:2px solid #b30000; padding:30px; z-index:10000; box-shadow:0 0 50px #000; max-width:80%; text-align:center;">
+    <h2 style="color:#ff4d4d; margin-top:0;">📜 새로운 핸드아웃!</h2>
+    <h3 id="modal-title" style="color:#fff;"></h3>
+    <p id="modal-content" style="color:#ccc; line-height:1.6;"></p>
+    <button onclick="closeHandout()" style="background:#b30000; color:#fff; border:none; padding:10px 20px; cursor:pointer; margin-top:20px;">확인</button>
+</div>
+
 
     <!-- 파이어베이스 로직 -->
     <script type="module">
@@ -130,6 +147,44 @@
                 }
             }, 50);
         });
+
+        import { getDatabase, ref, onValue, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+// 인벤토리 실시간 감시 (새 아이템이 들어오면 실행)
+const invRef = ref(db, 'room_01/pc1/inventory');
+
+// 페이지 로드 후 처음부터 있는 것 외에 "새로 추가"될 때만 팝업 띄우기 위한 변수
+let isInitialLoad = true;
+onValue(invRef, () => { isInitialLoad = false; }, { onlyOnce: true });
+
+onChildAdded(invRef, (data) => {
+    const item = data.val();
+    
+    // 1. 인벤토리 목록 업데이트
+    const list = document.getElementById('inventory-list');
+    if(list.querySelector('p')) list.innerHTML = ""; // '비어있음' 메시지 삭제
+    
+    const itemDiv = document.createElement('div');
+    itemDiv.style = "background:#111; border:1px solid #333; padding:10px; cursor:pointer;";
+    itemDiv.innerHTML = `<strong>${item.title}</strong>`;
+    itemDiv.onclick = () => showHandout(item.title, item.content); // 클릭하면 다시보기
+    list.appendChild(itemDiv);
+
+    // 2. 실시간 알림 팝업 (처음 로딩할 때가 아닐 때만)
+    if (!isInitialLoad) {
+        showHandout(item.title, item.content);
+    }
+});
+
+function showHandout(title, content) {
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('modal-content').innerText = content;
+    document.getElementById('handout-modal').style.display = "block";
+}
+
+window.closeHandout = function() {
+    document.getElementById('handout-modal').style.display = "none";
+}
     </script>
 </body>
 </html>
