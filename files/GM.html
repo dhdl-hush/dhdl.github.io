@@ -48,6 +48,20 @@
             50% { transform: translate(-1px, -1px); }
             100% { transform: translate(1px, -1px); }
         }
+
+        <div style="margin-top: 50px; border: 1px solid #b30000; padding: 20px; background: #0a0a0a;">
+    <h2 style="color: #b30000;">핸드아웃 전송</h2>
+    <input type="text" id="ho-title" placeholder="제목 (예: 오래된 열쇠)" style="width: 100%; padding: 10px; margin-bottom: 10px;">
+    <textarea id="ho-content" placeholder="내용을 입력하세요..." style="width: 100%; height: 100px; padding: 10px; margin-bottom: 10px;"></textarea>
+    
+    <div>
+        전송 대상: 
+        <button onclick="sendHandout('pc1')">PC1</button>
+        <button onclick="sendHandout('pc2')">PC2</button>
+        <button onclick="sendHandout('pc3')">PC3</button>
+        <button onclick="sendHandout('pc4')">PC4</button>
+    </div>
+</div>
     </style>
 </head>
 <body>
@@ -120,6 +134,27 @@
             console.error("데이터 읽기 실패:", error);
             statusText.innerText = "오류 발생: " + error.message;
         });
+
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+window.sendHandout = function(pcId) {
+    const title = document.getElementById('ho-title').value;
+    const content = document.getElementById('ho-content').value;
+
+    if(!title || !content) return alert("제목과 내용을 입력하세요.");
+
+    // 해당 PC의 inventory 노드에 데이터 추가
+    const targetRef = ref(db, `room_01/${pcId}/inventory`);
+    push(targetRef, {
+        title: title,
+        content: content,
+        timestamp: Date.now()
+    }).then(() => {
+        alert(`${pcId}에게 핸드아웃을 보냈습니다.`);
+        document.getElementById('ho-title').value = "";
+        document.getElementById('ho-content').value = "";
+    });
+}
     </script>
 </body>
 </html>
