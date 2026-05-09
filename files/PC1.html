@@ -33,6 +33,89 @@
             50% { transform: translate(-1px, -2px); }
             100% { transform: translate(1px, -1px); }
         }
+
+        /* 1. 핸드아웃 팝업창 전체 디자인 */
+#handout-modal {
+    display: none;
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #111; /* 배경 검정 */
+    border: 2px solid #b30000; /* 테두리 진한 빨강 */
+    padding: 30px;
+    z-index: 10000;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 10px #ff0000;
+    width: 85%;
+    max-width: 450px;
+    text-align: center;
+}
+
+/* 2. 핸드아웃 제목 */
+#modal-title {
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+/* 3. 핸드아웃 내용 (줄바꿈 핵심 부분!) */
+#modal-content {
+    color: #ccc;
+    line-height: 1.6;
+    text-align: left;
+    font-size: 0.95rem;
+    white-space: pre-wrap; /* ✅ 이 코드가 있어야 줄바꿈이 적용됩니다 */
+    margin-bottom: 20px;
+}
+
+/* 4. 비밀(Secret) 박스 - 닫혀있을 때 */
+.secret-box-hidden {
+    background: #200;
+    border: 1px dashed #b30000;
+    color: #ff4d4d;
+    padding: 15px;
+    margin-top: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+.secret-box-hidden:hover {
+    background: #400;
+}
+
+/* 5. 비밀(Secret) 박스 - 열렸을 때 */
+.secret-box-revealed {
+    background: #000;
+    border: 1px solid #ff0000;
+    color: #fff;
+    padding: 15px;
+    margin-top: 20px;
+    text-align: left;
+    white-space: pre-wrap; /* ✅ 비밀 내용도 줄바꿈 적용 */
+    animation: blood-spread 0.6s ease-in;
+}
+
+@keyframes blood-spread {
+    from { background: #b30000; }
+    to { background: #000; }
+}
+
+/* 6. 인벤토리 목록 디자인 */
+#inventory-list div {
+    background: #111;
+    border: 1px solid #333;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.9rem;
+}
+#inventory-list div:hover {
+    border-color: #b30000;
+    background: #1a0000;
+}
     </style>
 </head>
 <body>
@@ -141,29 +224,45 @@
         onValue(invRef, () => { isInitialLoad = false; }, { onlyOnce: true });
 
         // 새 아이템(핸드아웃)이 추가될 때마다 실행
+      let currentSecret = ""; // 현재 열린 팝업의 비밀 임시 저장
+
         onChildAdded(invRef, (snapshot) => {
             const item = snapshot.val();
             const list = document.getElementById('inventory-list');
             if(list.querySelector('p')) list.innerHTML = "";
 
-            // 목록에 추가
             const itemDiv = document.createElement('div');
-            itemDiv.style = "background:#111; border:1px solid #333; padding:10px; cursor:pointer; margin-bottom:5px;";
-            itemDiv.innerHTML = `<strong>${item.title}</strong>`;
-            itemDiv.onclick = () => window.showHandout(item.title, item.content);
+            itemDiv.style = "background:#111; border:1px solid #333; padding:10px; cursor:pointer; margin-bottom:5px; transition:0.3s;";
+            itemDiv.innerHTML = `<strong>${item.title}</strong> <small style="color:#555; float:right;">보기</small>`;
+            
+            // 인벤토리에서 클릭 시 비밀은 숨겨진 채로 팝업 열기
+            itemDiv.onclick = () => window.showHandout(item.title, item.content, item.secret);
             list.appendChild(itemDiv);
 
-            // 실시간 팝업 (페이지 처음 열 때가 아닐 때만)
             if (!isInitialLoad) {
-                window.showHandout(item.title, item.content);
+                window.showHandout(item.title, item.content, item.secret);
             }
         });
 
-        // --- 전역 함수 설정 (버튼 클릭 인식용) ---
-        window.showHandout = function(title, content) {
+        window.showHandout = function(title, content, secret) {
+            currentSecret = secret; // 비밀 저장
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-content').innerText = content;
+            
+            // 팝업 열 때 비밀 영역 초기화
+            document.getElementById('secret-placeholder').style.display = "block";
+            document.getElementById('secret-text').style.display = "none";
+            document.getElementById('secret-text').innerText = secret;
+            
             document.getElementById('handout-modal').style.display = "block";
+        }
+
+        // 비밀 폭로 함수
+        window.revealSecretInModal = function() {
+            if(confirm("이 비밀을 확인하시겠습니까? (쇼크 판정이 발생할 수 있습니다)")) {
+                document.getElementById('secret-placeholder').style.display = "none";
+                document.getElementById('secret-text').style.display = "block";
+            }
         }
 
         window.closeHandout = function() {
