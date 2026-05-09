@@ -282,6 +282,13 @@ window.revealSecretInModal = function() {
         document.getElementById('card-back').style.display = "block";
     }
 }
+        // 창을 닫는 함수를 전역(window)에 등록
+window.closeHandout = function() {
+    const modal = document.getElementById('handout-modal');
+    if (modal) {
+        modal.style.display = "none";
+    }
+};
     </script>
 </body>
 </html>
