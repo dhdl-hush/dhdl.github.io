@@ -34,87 +34,79 @@
             100% { transform: translate(1px, -1px); }
         }
 
-        /* 1. 핸드아웃 팝업창 전체 디자인 */
-#handout-modal {
-    display: none;
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: #111; /* 배경 검정 */
-    border: 2px solid #b30000; /* 테두리 진한 빨강 */
-    padding: 30px;
-    z-index: 10000;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 10px #ff0000;
-    width: 85%;
-    max-width: 450px;
+/* 인세인 표준 핸드아웃 스타일 */
+.insane-card {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    font-family: 'Malgun Gothic', serif;
+    border: 2px solid #000;
+    background: #fff;
+    color: #000;
+    box-shadow: 10px 10px 0px rgba(0,0,0,0.2);
+}
+
+.card-header {
     text-align: center;
-}
-
-/* 2. 핸드아웃 제목 */
-#modal-title {
-    color: #fff;
-    border-bottom: 1px solid #333;
-    padding-bottom: 15px;
-    margin-bottom: 15px;
-    font-size: 1.2rem;
-}
-
-/* 3. 핸드아웃 내용 (줄바꿈 핵심 부분!) */
-#modal-content {
-    color: #ccc;
-    line-height: 1.6;
-    text-align: left;
-    font-size: 0.95rem;
-    white-space: pre-wrap; /* ✅ 이 코드가 있어야 줄바꿈이 적용됩니다 */
-    margin-bottom: 20px;
-}
-
-/* 4. 비밀(Secret) 박스 - 닫혀있을 때 */
-.secret-box-hidden {
-    background: #200;
-    border: 1px dashed #b30000;
-    color: #ff4d4d;
-    padding: 15px;
-    margin-top: 20px;
-    cursor: pointer;
+    font-size: 1.5rem;
     font-weight: bold;
-    font-size: 0.9rem;
-    transition: 0.3s;
-}
-.secret-box-hidden:hover {
-    background: #400;
+    border-bottom: 2px solid #000;
+    padding: 10px;
+    letter-spacing: 2px;
 }
 
-/* 5. 비밀(Secret) 박스 - 열렸을 때 */
-.secret-box-revealed {
-    background: #000;
-    border: 1px solid #ff0000;
-    color: #fff;
+.card-info-table {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    border-bottom: 2px solid #000;
+}
+
+.info-label {
+    border-right: 2px solid #000;
+    padding: 5px;
+    font-weight: bold;
+    text-align: center;
+    background: #f0f0f0;
+}
+
+.info-value { padding: 5px 10px; }
+
+.card-body-title {
+    text-align: center;
+    font-weight: bold;
+    border-bottom: 1px solid #000;
+    padding: 5px;
+    background: #f9f9f9;
+}
+
+.card-content {
+    min-height: 200px;
     padding: 15px;
-    margin-top: 20px;
+    line-height: 1.8;
     text-align: left;
-    white-space: pre-wrap; /* ✅ 비밀 내용도 줄바꿈 적용 */
-    animation: blood-spread 0.6s ease-in;
+    white-space: pre-wrap;
+    background-image: repeating-linear-gradient(transparent, transparent 27px, #ddd 27px, #ddd 28px);
 }
 
-@keyframes blood-spread {
-    from { background: #b30000; }
-    to { background: #000; }
+/* 뒷면 (비밀) 스타일 */
+.insane-card.secret {
+    background: #000;
+    color: #fff;
+    border-color: #fff;
 }
 
-/* 6. 인벤토리 목록 디자인 */
-#inventory-list div {
-    background: #111;
-    border: 1px solid #333;
-    padding: 12px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-    font-size: 0.9rem;
-}
-#inventory-list div:hover {
-    border-color: #b30000;
-    background: #1a0000;
+.insane-card.secret .card-header { background: #000; color: #fff; border-bottom: 2px solid #fff; }
+.insane-card.secret .info-label { background: #222; color: #fff; border-right: 2px solid #fff; }
+.insane-card.secret .card-body-title { background: #000; color: #fff; border-bottom: 1px solid #fff; }
+.insane-card.secret .card-content { background-image: repeating-linear-gradient(transparent, transparent 27px, #444 27px, #444 28px); }
+
+.secret-footer {
+    background: #000;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    font-size: 0.8rem;
+    border-top: 2px solid #fff;
 }
     </style>
 </head>
@@ -162,23 +154,38 @@
 
     <!-- 핸드아웃 팝업 모달 -->
 <!-- 실시간 획득 알림 팝업 (최종 수정 버전) -->
-<div id="handout-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#1a1a1a; border:2px solid #b30000; padding:30px; z-index:10000; box-shadow:0 0 50px #000; width:85%; max-width:450px; text-align:center;">
-    <h2 style="color:#ff4d4d; margin-top:0; font-size:1rem; letter-spacing:2px;">📜 HANDOUT</h2>
-    <h3 id="modal-title" style="color:#fff; border-bottom:1px solid #333; padding-bottom:10px;"></h3>
+<div id="handout-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10000; width:90%; max-width:420px;">
     
-    <div style="margin-top:15px;">
-        <div id="modal-content" style="color:#ccc; line-height:1.6; text-align:left; font-size:0.9rem;"></div>
-        
-        <!-- 이 부분이 누락되어 오류가 났을 확률이 높습니다 -->
-        <div id="modal-secret-area">
-            <div id="secret-placeholder" class="secret-box-hidden" onclick="revealSecretInModal()">
-                ⚠️ 비밀 확인 (클릭)
-            </div>
-            <div id="secret-text" class="secret-box-revealed" style="display:none;"></div>
+    <!-- 앞면 (공개 정보) -->
+    <div id="card-front" class="insane-card">
+        <div class="card-header">Handout</div>
+        <div class="card-info-table">
+            <div class="info-label">이름</div>
+            <div class="info-value" id="modal-title"></div>
+        </div>
+        <div class="card-body-title">사 명</div>
+        <div class="card-content" id="modal-content"></div>
+        <div style="padding:10px;">
+            <button onclick="revealSecretInModal()" style="width:100%; padding:10px; background:#000; color:#fff; border:none; cursor:pointer; font-weight:bold;">비밀 확인</button>
         </div>
     </div>
-    
-    <button onclick="closeHandout()" style="background:#333; color:#fff; border:none; padding:10px 20px; cursor:pointer; margin-top:20px; width:100%;">창 닫기</button>
+
+    <!-- 뒷면 (비밀 정보 - 처음엔 숨김) -->
+    <div id="card-back" class="insane-card secret" style="display:none;">
+        <div class="card-header" style="color:#fff;">Handout</div>
+        <div class="card-info-table" style="border-bottom: 2px solid #fff;">
+            <div class="info-label" style="border-right: 2px solid #fff;">비밀</div>
+            <div class="info-value"></div>
+        </div>
+        <div class="card-info-table" style="border-bottom: 1px solid #fff;">
+            <div class="info-label" style="border-right: 1px solid #fff;">쇼크</div>
+            <div class="info-value" id="modal-shock"></div>
+        </div>
+        <div class="card-content" id="modal-secret-text"></div>
+        <div class="secret-footer">이 비밀을 스스로 밝힐 수는 없다.</div>
+    </div>
+
+    <button onclick="closeHandout()" style="width:100%; margin-top:10px; padding:10px; background:#333; color:#fff; border:none; cursor:pointer;">창 닫기</button>
 </div>
 
     <!-- 파이어베이스 로직 (통합 버전) -->
@@ -257,30 +264,24 @@
             }
         });
 
-        window.showHandout = function(title, content, secret) {
-            currentSecret = secret; // 비밀 저장
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-content').innerText = content;
-            
-            // 팝업 열 때 비밀 영역 초기화
-            document.getElementById('secret-placeholder').style.display = "block";
-            document.getElementById('secret-text').style.display = "none";
-            document.getElementById('secret-text').innerText = secret;
-            
-            document.getElementById('handout-modal').style.display = "block";
-        }
+window.showHandout = function(title, content, secret, shock) {
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('modal-content').innerText = content;
+    document.getElementById('modal-secret-text').innerText = secret;
+    document.getElementById('modal-shock').innerText = shock || "없음";
+    
+    // 초기 상태: 앞면만 보이기
+    document.getElementById('card-front').style.display = "block";
+    document.getElementById('card-back').style.display = "none";
+    document.getElementById('handout-modal').style.display = "block";
+}
 
-        // 비밀 폭로 함수
-        window.revealSecretInModal = function() {
-            if(confirm("이 비밀을 확인하시겠습니까? (쇼크 판정이 발생할 수 있습니다)")) {
-                document.getElementById('secret-placeholder').style.display = "none";
-                document.getElementById('secret-text').style.display = "block";
-            }
-        }
-
-        window.closeHandout = function() {
-            document.getElementById('handout-modal').style.display = "none";
-        }
+window.revealSecretInModal = function() {
+    if(confirm("이 비밀을 확인하시겠습니까? 쇼크 판정이 발생할 수 있습니다.")) {
+        document.getElementById('card-front').style.display = "none";
+        document.getElementById('card-back').style.display = "block";
+    }
+}
     </script>
 </body>
 </html>
