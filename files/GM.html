@@ -177,8 +177,10 @@
             { 
                 title: "낡은 일기장", 
                 content: "일기장에는 10월 13일의 기록이 피로 얼룩져 있다.",
-                secret: "사실 일기장의 피는 당신의 것이다. 당신은 이 날의 기억이 없다." 
-            },
+                secret: "사실 일기장의 피는 당신의 것이다. 당신은 이 날의 기억이 없다.",
+                shock: "전원 / 1D6", // 쇼크 수치
+                target: "해당자"    // 쇼크 대상
+        },
             { 
                 title: "저택의 평면도", 
                 content: "2층 창고 뒤에 숨겨진 통로가 그려져 있다.",
@@ -205,19 +207,21 @@
         });
 
         // 3. 카드 전송 함수
-       window.sendPreparedHandout = function(pcId, index) {
-            const selectedHandout = handoutList[index];
-            const targetRef = ref(db, `room_01/${pcId}/inventory`);
-            
-            push(targetRef, {
-                title: selectedHandout.title,
-                content: selectedHandout.content,
-                secret: selectedHandout.secret, // 비밀 데이터 추가
-                timestamp: Date.now()
-            }).then(() => {
-                alert(`${pcId.toUpperCase()}에게 [${selectedHandout.title}] 전송 완료!`);
-            });
-        };
+     window.sendPreparedHandout = function(pcId, index) {
+    const selectedHandout = handoutList[index];
+    const targetRef = ref(db, `room_01/${pcId}/inventory`);
+    
+    push(targetRef, {
+        title: selectedHandout.title,
+        content: selectedHandout.content,
+        secret: selectedHandout.secret,
+        shock: selectedHandout.shock || "없음",
+        trigger: selectedHandout.target || "전원",
+        timestamp: Date.now()
+    }).then(() => {
+        alert(`${pcId.toUpperCase()}에게 핸드아웃 전송 완료!`);
+    });
+};
     </script>
 </body>
 </html>
