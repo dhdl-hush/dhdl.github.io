@@ -161,12 +161,25 @@
     </div>
 
     <!-- 핸드아웃 팝업 모달 -->
-    <div id="handout-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#1a1a1a; border:2px solid #b30000; padding:30px; z-index:10000; box-shadow:0 0 50px #000; width:80%; max-width:400px; text-align:center;">
-        <h2 style="color:#ff4d4d; margin-top:0;">📜 새로운 핸드아웃!</h2>
-        <h3 id="modal-title" style="color:#fff;"></h3>
-        <p id="modal-content" style="color:#ccc; line-height:1.6; white-space: pre-wrap;"></p>
-        <button onclick="closeHandout()" style="background:#b30000; color:#fff; border:none; padding:10px 20px; cursor:pointer; margin-top:20px;">확인</button>
+<!-- 실시간 획득 알림 팝업 (최종 수정 버전) -->
+<div id="handout-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#1a1a1a; border:2px solid #b30000; padding:30px; z-index:10000; box-shadow:0 0 50px #000; width:85%; max-width:450px; text-align:center;">
+    <h2 style="color:#ff4d4d; margin-top:0; font-size:1rem; letter-spacing:2px;">📜 HANDOUT</h2>
+    <h3 id="modal-title" style="color:#fff; border-bottom:1px solid #333; padding-bottom:10px;"></h3>
+    
+    <div style="margin-top:15px;">
+        <div id="modal-content" style="color:#ccc; line-height:1.6; text-align:left; font-size:0.9rem;"></div>
+        
+        <!-- 이 부분이 누락되어 오류가 났을 확률이 높습니다 -->
+        <div id="modal-secret-area">
+            <div id="secret-placeholder" class="secret-box-hidden" onclick="revealSecretInModal()">
+                ⚠️ 비밀 확인 (클릭)
+            </div>
+            <div id="secret-text" class="secret-box-revealed" style="display:none;"></div>
+        </div>
     </div>
+    
+    <button onclick="closeHandout()" style="background:#333; color:#fff; border:none; padding:10px 20px; cursor:pointer; margin-top:20px; width:100%;">창 닫기</button>
+</div>
 
     <!-- 파이어베이스 로직 (통합 버전) -->
     <script type="module">
