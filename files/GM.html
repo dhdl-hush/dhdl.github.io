@@ -24,6 +24,30 @@
         .handout-sender input, .handout-sender textarea { width: 100%; padding: 10px; margin-bottom: 10px; background: #111; color: white; border: 1px solid #333; box-sizing: border-box; }
         .handout-sender button { background: #b30000; color: white; border: none; padding: 10px 15px; cursor: pointer; margin-right: 5px; }
         .handout-sender button:hover { background: #ff0000; }
+
+        /* 핸드아웃 카드 덱 스타일 */
+.handout-deck {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 30px;
+    padding: 20px;
+    background: #0d0d0d;
+    border: 1px solid #333;
+}
+.handout-card {
+    background: #1a1a1a;
+    border: 1px solid #b30000;
+    padding: 15px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+}
+.handout-card h4 { margin: 0 0 10px 0; color: #ff4d4d; border-bottom: 1px solid #333; padding-bottom: 5px; }
+.handout-card p { font-size: 0.85rem; color: #ccc; margin: 0 0 15px 0; flex-grow: 1; white-space: pre-wrap; }
+.send-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.send-btns button { font-size: 0.7rem; padding: 5px; cursor: pointer; background: #333; color: white; border: none; }
+.send-btns button:hover { background: #b30000; }
     </style>
 </head>
 <body>
@@ -47,6 +71,11 @@
             <button onclick="sendHandout('pc4')">PC4</button>
         </div>
     </div>
+
+    <h2 style="color: #b30000; margin-top: 40px; text-align: center;">시나리오 핸드아웃 덱</h2>
+<div id="handout-deck" class="handout-deck">
+    <!-- 자바스크립트에서 카드들을 여기에 채워넣을 겁니다 -->
+</div>
 
     <!-- 스크립트 시작 -->
     <script type="module">
@@ -141,6 +170,54 @@
                 });
             }
         }
+
+        // 1. 시나리오 핸드아웃 리스트 (여기에 카드 내용을 미리 다 적어두세요!)
+     // 시나리오 핸드아웃 리스트 (비밀 내용 추가)
+        const handoutList = [
+            { 
+                title: "낡은 일기장", 
+                content: "일기장에는 10월 13일의 기록이 피로 얼룩져 있다.",
+                secret: "사실 일기장의 피는 당신의 것이다. 당신은 이 날의 기억이 없다." 
+            },
+            { 
+                title: "저택의 평면도", 
+                content: "2층 창고 뒤에 숨겨진 통로가 그려져 있다.",
+                secret: "비밀 통로 안쪽에는 수십 명의 실종자 명단이 붙어 있다."
+            }
+            // 필요한 만큼 계속 추가...
+        ];
+        // 2. 카드 덱 화면에 그리기
+        const deckContainer = document.getElementById('handout-deck');
+        handoutList.forEach((ho, index) => {
+            const card = document.createElement('div');
+            card.className = 'handout-card';
+            card.innerHTML = `
+                <h4>${ho.title}</h4>
+                <p>${ho.content}</p>
+                <div class="send-btns">
+                    <button onclick="sendPreparedHandout('pc1', ${index})">PC1 전송</button>
+                    <button onclick="sendPreparedHandout('pc2', ${index})">PC2 전송</button>
+                    <button onclick="sendPreparedHandout('pc3', ${index})">PC3 전송</button>
+                    <button onclick="sendPreparedHandout('pc4', ${index})">PC4 전송</button>
+                </div>
+            `;
+            deckContainer.appendChild(card);
+        });
+
+        // 3. 카드 전송 함수
+       window.sendPreparedHandout = function(pcId, index) {
+            const selectedHandout = handoutList[index];
+            const targetRef = ref(db, `room_01/${pcId}/inventory`);
+            
+            push(targetRef, {
+                title: selectedHandout.title,
+                content: selectedHandout.content,
+                secret: selectedHandout.secret, // 비밀 데이터 추가
+                timestamp: Date.now()
+            }).then(() => {
+                alert(`${pcId.toUpperCase()}에게 [${selectedHandout.title}] 전송 완료!`);
+            });
+        };
     </script>
 </body>
 </html>
