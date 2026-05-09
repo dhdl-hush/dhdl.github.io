@@ -58,23 +58,42 @@
     <!-- PC 상태 카드들이 보일 곳 -->
     <div id="pc-container"></div>
 
-    <!-- [여기로 옮겨왔습니다!] 핸드아웃 전송창 UI -->
-    <div class="handout-sender">
-        <h2 style="color: #b30000;">핸드아웃 전송</h2>
-        <input type="text" id="ho-title" placeholder="제목 (예: 오래된 열쇠)">
-        <textarea id="ho-content" placeholder="내용을 입력하세요..."></textarea>
-        <div>
-            전송 대상: 
-            <button onclick="sendHandout('pc1')">PC1</button>
-            <button onclick="sendHandout('pc2')">PC2</button>
-            <button onclick="sendHandout('pc3')">PC3</button>
-            <button onclick="sendHandout('pc4')">PC4</button>
-        </div>
+    <!-- 핸드아웃 직접 입력 전송창 -->
+<div class="handout-sender">
+    <h2 style="color: #b30000;">핸드아웃 직접 입력 전송</h2>
+    <input type="text" id="ho-title" placeholder="아이템 이름 (예: 오래된 열쇠)">
+    <textarea id="ho-content" placeholder="공개 정보 (사명) 내용을 입력하세요..."></textarea>
+    <textarea id="ho-secret" placeholder="비밀 내용을 입력하세요..." style="border-color: #ff0000;"></textarea>
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <input type="text" id="ho-shock" placeholder="쇼크 (예: 전원 / 1D6)" style="flex: 1;">
+        <input type="text" id="ho-target" placeholder="대상 (예: 해당자)" style="flex: 1;">
     </div>
+    <div>
+        전송 대상: 
+        <button onclick="sendHandout('pc1')">PC1</button>
+        <button onclick="sendHandout('pc2')">PC2</button>
+        <button onclick="sendHandout('pc3')">PC3</button>
+        <button onclick="sendHandout('pc4')">PC4</button>
+    </div>
+</div>
 
     <h2 style="color: #b30000; margin-top: 40px; text-align: center;">시나리오 핸드아웃 덱</h2>
 <div id="handout-deck" class="handout-deck">
     <!-- 자바스크립트에서 카드들을 여기에 채워넣을 겁니다 -->
+</div>
+
+    <!-- GM용 핸드아웃 확인 팝업 (PC와 동일한 디자인) -->
+<div id="gm-view-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10000; width:90%; max-width:420px; background: rgba(0,0,0,0.9); padding: 20px; border: 1px solid #b30000;">
+    <div id="gm-card-view" class="insane-card secret">
+        <div class="card-header">GM VIEW</div>
+        <div class="card-info-table"><div class="info-label">이름</div><div class="info-value" id="gm-modal-title"></div></div>
+        <div class="card-body-title">공개 정보</div>
+        <div class="card-content" id="gm-modal-content" style="min-height:100px; font-size:0.8rem;"></div>
+        <div class="card-body-title" style="color:red;">비 밀</div>
+        <div class="card-content" id="gm-modal-secret" style="min-height:100px; color:#ffb3b3; font-size:0.8rem;"></div>
+        <div class="card-info-table"><div class="info-label">쇼크</div><div class="info-value" id="gm-modal-shock"></div></div>
+    </div>
+    <button onclick="closeGmModal()" style="width:100%; margin-top:10px; padding:10px; background:#333; color:#fff; border:none; cursor:pointer;">창 닫기</button>
 </div>
 
     <!-- 스크립트 시작 -->
@@ -110,7 +129,7 @@
                 const pc = data[pcId];
                 const card = document.createElement('div');
                 card.className = `pc-card ${pc.lastDice === 2 ? 'fumble' : ''} ${pc.lastDice === 12 ? 'special' : ''}`;
-              // 인벤토리 목록 HTML 생성
+             // 인벤토리 목록 HTML 생성 (수정 버전)
                 let invHtml = '<div style="margin-top:10px; border-top:1px solid #222; padding-top:10px;">';
                 invHtml += '<div style="font-size:0.8rem; color:#888; margin-bottom:5px;">보유 인벤토리:</div>';
                 
@@ -118,9 +137,11 @@
                     for (let itemId in pc.inventory) {
                         const item = pc.inventory[itemId];
                         invHtml += `
-                            <div style="display:flex; justify-content:space-between; background:#111; padding:5px; margin-bottom:3px; font-size:0.8rem;">
-                                <span>- ${item.title}</span>
-                                <button onclick="deleteItem('${pcId}', '${itemId}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer; padding:0 5px;">[삭제]</button>
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#111; padding:5px; margin-bottom:3px; font-size:0.8rem; border:1px solid #222;">
+                                <!-- 이름을 클릭하면 상세 보기 함수 실행 -->
+                                <span onclick="viewHandoutDetail('${pcId}', '${itemId}')" style="cursor:pointer; color:#00ffcc; text-decoration:underline;">- ${item.title}</span>
+                                
+                                <button onclick="deleteItem('${pcId}', '${itemId}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:0.7rem; padding:0 5px;">[삭제]</button>
                             </div>
                         `;
                     }
@@ -146,20 +167,30 @@
         window.sendHandout = function(pcId) {
             const title = document.getElementById('ho-title').value;
             const content = document.getElementById('ho-content').value;
+            const secret = document.getElementById('ho-secret').value;
+            const shock = document.getElementById('ho-shock').value;
+            const target = document.getElementById('ho-target').value;
 
-            if(!title || !content) return alert("제목과 내용을 입력하세요.");
+            if(!title || !content || !secret) return alert("이름, 내용, 비밀은 필수입니다.");
 
             const targetRef = ref(db, `room_01/${pcId}/inventory`);
             push(targetRef, {
                 title: title,
                 content: content,
+                secret: secret,
+                shock: shock || "없음",
+                trigger: target || "전원",
                 timestamp: Date.now()
             }).then(() => {
                 alert(`${pcId.toUpperCase()}에게 전송했습니다.`);
+                // 입력창 초기화
                 document.getElementById('ho-title').value = "";
                 document.getElementById('ho-content').value = "";
+                document.getElementById('ho-secret').value = "";
+                document.getElementById('ho-shock').value = "";
+                document.getElementById('ho-target').value = "";
             });
-        }
+        };
 
         // 아이템 삭제 함수
         window.deleteItem = function(pcId, itemId) {
@@ -222,6 +253,26 @@
         alert(`${pcId.toUpperCase()}에게 핸드아웃 전송 완료!`);
     });
 };
+        // GM이 PC의 핸드아웃 상세(비밀 포함) 보기
+        window.viewHandoutDetail = function(pcId, itemId) {
+            const dbRef = ref(db, `room_01/${pcId}/inventory/${itemId}`);
+            onValue(dbRef, (snapshot) => {
+                const data = snapshot.val();
+                if(!data) return;
+                
+                document.getElementById('gm-modal-title').innerText = data.title;
+                document.getElementById('gm-modal-content').innerText = data.content;
+                document.getElementById('gm-modal-secret').innerText = data.secret;
+                document.getElementById('gm-modal-shock').innerText = data.shock || "없음";
+                
+                document.getElementById('gm-view-modal').style.display = "block";
+            }, { onlyOnce: true });
+        };
+
+        window.closeGmModal = function() {
+            document.getElementById('gm-view-modal').style.display = "none";
+        };
+    
     </script>
 </body>
 </html>
