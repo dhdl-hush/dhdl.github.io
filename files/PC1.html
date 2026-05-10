@@ -298,7 +298,7 @@
                     else if (total === 12) resBox.innerHTML = `결과: ${total} - <span class="special">스페셜!</span>`;
                     else resBox.innerHTML = `결과: ${total} - <span>판정 완료</span>`;
 
-                    update(ref(db, 'room_01/pc1'), { lastDice: total, name: "플레이어1", hp: 6, san: 6 });
+                    update(ref(db, 'room_01/pc1'), { lastDice: total });
                     btn.disabled = false;
                 }
             }, 50);
