@@ -391,7 +391,23 @@ window.closeHandout = function() {
                 lastUpdate: Date.now()
             });
         };
-    
+    // GM이 바꾼 수치를 내 화면에 실시간으로 반영
+        onValue(ref(db, 'room_01/pc1'), (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                if(data.hp !== undefined) document.getElementById('hp-val').innerText = data.hp;
+                if(data.san !== undefined) document.getElementById('san-val').innerText = data.san;
+                if(data.name && !document.getElementById('char-name').value) {
+                    document.getElementById('char-name').value = data.name;
+                }
+            }
+        });
+
+        // 이름만 서버로 동기화하는 함수
+        window.syncName = function() {
+            const name = document.getElementById('char-name').value;
+            update(ref(db, 'room_01/pc1'), { name: name });
+        };
     </script>
 </body>
 </html>
