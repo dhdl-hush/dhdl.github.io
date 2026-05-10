@@ -247,22 +247,25 @@
       let currentSecret = ""; // 현재 열린 팝업의 비밀 임시 저장
 
         onChildAdded(invRef, (snapshot) => {
-            const item = snapshot.val();
-            const list = document.getElementById('inventory-list');
-            if(list.querySelector('p')) list.innerHTML = "";
+    const item = snapshot.val();
+    const list = document.getElementById('inventory-list');
+    if(list.querySelector('p')) list.innerHTML = "";
 
-            const itemDiv = document.createElement('div');
-            itemDiv.style = "background:#111; border:1px solid #333; padding:10px; cursor:pointer; margin-bottom:5px; transition:0.3s;";
-            itemDiv.innerHTML = `<strong>${item.title}</strong> <small style="color:#555; float:right;">보기</small>`;
-            
-            // 인벤토리에서 클릭 시 비밀은 숨겨진 채로 팝업 열기
-            itemDiv.onclick = () => window.showHandout(item.title, item.content, item.secret);
-            list.appendChild(itemDiv);
+    // 쇼크와 대상을 합쳐서 하나의 문자열로 만듭니다 (예: "전원 / 1D6")
+    const shockInfo = `${item.trigger || '전원'} / ${item.shock || '없음'}`;
 
-            if (!isInitialLoad) {
-                window.showHandout(item.title, item.content, item.secret);
-            }
-        });
+    const itemDiv = document.createElement('div');
+    itemDiv.style = "background:#111; border:1px solid #333; padding:10px; cursor:pointer; margin-bottom:5px; transition:0.3s;";
+    itemDiv.innerHTML = `<strong>${item.title}</strong> <small style="color:#555; float:right;">보기</small>`;
+    
+    // 이 부분에서 shockInfo를 추가로 전달합니다.
+    itemDiv.onclick = () => window.showHandout(item.title, item.content, item.secret, shockInfo);
+    list.appendChild(itemDiv);
+
+    if (!isInitialLoad) {
+        window.showHandout(item.title, item.content, item.secret, shockInfo);
+    }
+});
 
 window.showHandout = function(title, content, secret, shock) {
     document.getElementById('modal-title').innerText = title;
