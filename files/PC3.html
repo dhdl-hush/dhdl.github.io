@@ -90,10 +90,14 @@
                         <span class="stat-max">/ 6</span>
                     </div>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">NOTE</span>
-                    <input type="text" id="char-note" class="info-input" placeholder="특기 또는 상태 이상" onchange="syncProfile()">
-                </div>
+            
+        <div class="info-row" style="align-items: flex-start; flex-direction: column; border-bottom: none; height: auto;">
+            <span class="info-label" style="margin-bottom: 8px; width: 100%;">NOTE / 특기</span>
+            <textarea id="char-note" class="info-input" 
+                  style="height: 100px; background: rgba(255,255,255,0.05); border: 1px solid #333; padding: 10px; resize: none; line-height: 1.6; width: 100%; box-sizing: border-box; display: block;" 
+                  placeholder="특기, 소지품, 광기 등 내용을 입력하세요 (Enter로 줄바꿈 가능)" 
+                  onchange="syncProfile()"></textarea>
+    </div>
             </div>
         </div>
 
