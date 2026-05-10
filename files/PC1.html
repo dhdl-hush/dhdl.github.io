@@ -108,18 +108,87 @@
     font-size: 0.8rem;
     border-top: 2px solid #fff;
 }
+        /* 캐릭터 시트 스타일 */
+.character-sheet {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 20px;
+    background: #111;
+    border: 2px solid #333;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 5px;
+}
+
+.profile-img {
+    width: 120px; height: 150px;
+    background: #050505;
+    border: 1px solid #b30000;
+    display: flex; align-items: center; justify-content: center;
+    color: #444; font-size: 0.8rem;
+}
+
+.char-info { display: flex; flex-direction: column; gap: 10px; }
+
+.info-row { display: flex; align-items: center; gap: 10px; }
+.info-label { color: #888; font-size: 0.8rem; width: 60px; }
+.info-input { 
+    background: transparent; border: none; border-bottom: 1px solid #444; 
+    color: white; padding: 5px; width: 100%; outline: none;
+}
+.info-input:focus { border-bottom-color: #b30000; }
+
+/* 수치 조절기 디자인 */
+.stat-control { display: flex; align-items: center; gap: 15px; background: #1a1a1a; padding: 5px 15px; border-radius: 20px; }
+.stat-btn { 
+    background: none; border: 1px solid #b30000; color: #b30000; 
+    width: 25px; height: 25px; border-radius: 50%; cursor: pointer; font-weight: bold;
+}
+.stat-btn:hover { background: #b30000; color: white; }
+.stat-num { font-size: 1.2rem; font-weight: bold; min-width: 20px; text-align: center; }
+        
     </style>
 </head>
 <body>
 
     <header><h1>PC1 SHEET</h1></header>
 
-    <div class="container">
-        <!-- 상태 수치 -->
-        <div class="status-grid">
-            <div class="status-box"><div>생명력</div><div class="status-value">6/6</div></div>
-            <div class="status-box"><div>이성치</div><div class="status-value">6/6</div></div>
+   <div class="container">
+    <!-- 캐릭터 시트 섹션 -->
+    <div class="character-sheet">
+        <div class="profile-img">
+            <!-- 이미지 주소가 있다면 <img src="..."> 로 교체 가능 -->
+            No Image
         </div>
+        <div class="char-info">
+            <div class="info-row">
+                <span class="info-label">이름</span>
+                <input type="text" id="char-name" class="info-input" placeholder="이름을 입력하세요" onchange="syncStat()">
+            </div>
+            <div class="info-row">
+                <span class="info-label">생명력</span>
+                <div class="stat-control">
+                    <button class="stat-btn" onclick="changeStat('hp', -1)">-</button>
+                    <span id="hp-val" class="stat-num">6</span>
+                    <button class="stat-btn" onclick="changeStat('hp', 1)">+</button>
+                </div>
+            </div>
+            <div class="info-row">
+                <span class="info-label">이성치</span>
+                <div class="stat-control">
+                    <button class="stat-btn" onclick="changeStat('san', -1)">-</button>
+                    <span id="san-val" class="stat-num">6</span>
+                    <button class="stat-btn" onclick="changeStat('san', 1)">+</button>
+                </div>
+            </div>
+            <div class="info-row">
+                <span class="info-label">특기/기타</span>
+                <input type="text" id="char-note" class="info-input" placeholder="주요 특기 등 메모" onchange="syncStat()">
+            </div>
+        </div>
+    </div>
+    
+    <!-- 주사위 섹션 등 기존 코드는 이 아래에 계속... -->
 
         <!-- 주사위 판정 -->
         <div class="dice-section">
@@ -292,6 +361,37 @@ window.closeHandout = function() {
         modal.style.display = "none";
     }
 };
+
+        // 수치 관리 변수
+        let hp = 6;
+        let san = 6;
+
+        // 수치 변경 함수
+        window.changeStat = function(type, amount) {
+            if (type === 'hp') {
+                hp = Math.max(0, hp + amount);
+                document.getElementById('hp-val').innerText = hp;
+            } else {
+                san = Math.max(0, san + amount);
+                document.getElementById('san-val').innerText = san;
+            }
+            syncStat(); // 서버에 저장
+        };
+
+        // 서버(Firebase)와 데이터 동기화
+        window.syncStat = function() {
+            const name = document.getElementById('char-name').value;
+            const note = document.getElementById('char-note').value;
+            
+            update(ref(db, 'room_01/pc1'), {
+                name: name || "플레이어1",
+                hp: hp,
+                san: san,
+                note: note,
+                lastUpdate: Date.now()
+            });
+        };
+    
     </script>
 </body>
 </html>
