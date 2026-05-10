@@ -127,6 +127,15 @@
             <!-- 핸드아웃 아이템이 여기에 추가됨 -->
         </div>
     </div>
+    <!-- [추가] 아이템 전용 구역 (인벤토리 구역 근처에 넣으세요) -->
+<div class="container" style="margin-top: 20px;">
+    <h3 style="color: #00ffcc; border-bottom: 1px solid #333;">아이템 (소모품)</h3>
+    <div id="pc-item-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+        <!-- 진통제, 무기 등은 여기에 따로 쌓입니다 -->
+        <p style="color: #444; font-size: 0.8rem;">보유 중인 아이템이 없습니다.</p>
+    </div>
+</div>
+    
 
     <!-- 핸드아웃 모달 -->
     <div id="handout-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10000; width:90%; max-width:400px;">
@@ -300,6 +309,34 @@
     // 사용 후 아이템 삭제
     remove(ref(db, pcPath + '/inventory/' + itemId));
 };
+
+        // --- 아이템 전용 감시 로직 ---
+const itemRef = ref(db, pcPath + '/items'); // 경로를 /items 로 분리
+
+onChildAdded(itemRef, (snapshot) => {
+    const item = snapshot.val();
+    const itemId = snapshot.key;
+    const list = document.getElementById('pc-item-list');
+    if(list.querySelector('p')) list.innerHTML = "";
+
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'item-slot'; // 기존 디자인 활용
+    itemDiv.id = "real-item-" + itemId;
+    itemDiv.style.borderColor = "#00ffcc"; // 아이템은 민트색 테두리로 구분
+
+    itemDiv.innerHTML = `
+        <div style="font-weight:bold; color:#00ffcc; margin-bottom:5px;">${item.title}</div>
+        <button class="use-btn" onclick="window.useItem('${itemId}', '${item.effect.type}', ${item.effect.val}, '${item.title}')" 
+                style="width:100%; background:#00ffcc; color:#000; font-weight:bold; border:none; padding:5px; cursor:pointer;">사용</button>
+    `;
+    list.appendChild(itemDiv);
+});
+
+// 아이템 삭제 감시 (사용 시 목록에서 제거)
+onChildRemoved(itemRef, (snapshot) => {
+    const itemDiv = document.getElementById("real-item-" + snapshot.key);
+    if(itemDiv) itemDiv.remove();
+});
         
     </script>
 </body>
