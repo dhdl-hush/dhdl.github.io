@@ -277,6 +277,30 @@
         };
 
         window.closeHandout = () => { document.getElementById('handout-modal').style.display = "none"; };
+
+        window.useItem = function(itemId, type, val, title) {
+    if(!confirm(`[${title}]을(를) 사용하시겠습니까?`)) return;
+
+    if (type === 'painkiller') {
+        const hpEl = document.getElementById('hp-val');
+        const sanEl = document.getElementById('san-val');
+        if(confirm("생명력을 회복하시겠습니까? (취소 시 이성치 회복)")) {
+            update(ref(db, pcPath), { hp: Math.min(6, parseInt(hpEl.innerText) + 1) });
+        } else {
+            update(ref(db, pcPath), { san: Math.min(6, parseInt(sanEl.innerText) + 1) });
+        }
+    } else if (type === 'weapon') {
+        document.getElementById('roll-btn').disabled = false;
+        alert("무기를 사용하여 다시 굴릴 수 있습니다!");
+    } else if (type === 'talisman') {
+        update(ref(db, pcPath), { lastDice: "부적 사용!" });
+        alert("부적을 사용했습니다. 재굴림 대상을 GM에게 말하세요.");
+    }
+
+    // 사용 후 아이템 삭제
+    remove(ref(db, pcPath + '/inventory/' + itemId));
+};
+        
     </script>
 </body>
 </html>
