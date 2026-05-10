@@ -110,6 +110,22 @@
     <button onclick="closeGmModal()" style="width:100%; margin-top:10px; padding:10px; background:#333; color:#fff; border:none; cursor:pointer;">창 닫기</button>
 </div>
 
+    <!-- GM 핸드아웃 입력창 안쪽, 맨 윗부분에 추가 -->
+<div style="margin-bottom:10px;">
+    <span style="font-size:0.8rem; color:#888;">아이템 프리셋: </span>
+    <select id="item-preset" onchange="window.setPreset()" style="background:#111; color:white; border:1px solid #b30000; padding:5px;">
+        <option value="custom">직접 입력</option>
+        <option value="painkiller">진통제 (HP/SAN 1 회복)</option>
+        <option value="weapon">무기 (자신 재굴림)</option>
+        <option value="talisman">부적 (타인 재굴림)</option>
+    </select>
+</div>
+
+<!-- 데이터 보관용 (안 보이는 곳에 추가) -->
+<input type="hidden" id="ho-effect-type" value="none">
+<input type="hidden" id="ho-effect-val" value="0">
+    
+
     <!-- 스크립트 시작 -->
     <script type="module">
         // 1. 도구는 맨 위에서 한 번만 가져옵니다! (push 추가)
@@ -214,6 +230,8 @@
             const secret = document.getElementById('ho-secret').value;
             const shock = document.getElementById('ho-shock').value;
             const target = document.getElementById('ho-target').value;
+            const effectType = document.getElementById('ho-effect-type').value;
+            const effectVal = document.getElementById('ho-effect-val').value;
 
             if(!title || !content || !secret) return alert("이름, 내용, 비밀은 필수입니다.");
 
@@ -221,6 +239,7 @@
             push(targetRef, {
                 title: title,
                 content: content,
+                effect: effectType !== 'none' ? { type: effectType, val: parseInt(effectVal) } : null,
                 secret: secret,
                 shock: shock || "없음",
                 trigger: target || "전원",
@@ -326,6 +345,28 @@
                 [type]: newVal
             });
         };
+
+        // 1. 프리셋 선택 시 자동 입력 함수
+window.setPreset = function() {
+    const preset = document.getElementById('item-preset').value;
+    const title = document.getElementById('ho-title');
+    const content = document.getElementById('ho-content');
+    const type = document.getElementById('ho-effect-type');
+    const val = document.getElementById('ho-effect-val');
+
+    if(preset === 'painkiller') {
+        title.value = "진통제"; content.value = "사용 시 생명력 혹은 이성치를 1점 회복한다.";
+        type.value = "painkiller"; val.value = 1;
+    } else if(preset === 'weapon') {
+        title.value = "무기"; content.value = "판정 실패 시, 소모하여 재굴림할 수 있다.";
+        type.value = "weapon"; val.value = 0;
+    } else if(preset === 'talisman') {
+        title.value = "부적"; content.value = "타인 판정 실패 시, 소모하여 재굴림하게 한다.";
+        type.value = "talisman"; val.value = 0;
+    } else {
+        type.value = "none"; val.value = 0;
+    }
+};
     </script>
 </body>
 </html>
