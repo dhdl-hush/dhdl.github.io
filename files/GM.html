@@ -169,10 +169,17 @@
                 invHtml += '</div>';
 
                 // --- 수정된 부분: 수치 조절 버튼 추가 ---
-                card.innerHTML = `
-                    <div class="pc-name">${pcId.toUpperCase()} : ${pc.name || '미설정'}</div>
-                    <div style="font-size: 0.7rem; color: #666; margin-bottom: 10px;">${pc.note || ''}</div>
-                    
+                // GM 페이지 card.innerHTML 내부 수정
+        card.innerHTML = `
+            <div class="pc-name">${pcId.toUpperCase()} : ${pc.name || '미설정'}</div>
+    
+            <!-- 자동 줄바꿈(pre-wrap)과 영역 제한(break-all) 추가 -->
+            <div style="font-size: 0.75rem; color: #888; margin-bottom: 12px; 
+                        white-space: pre-wrap; word-break: break-all; 
+                        line-height: 1.4; border-bottom: 1px solid #222; padding-bottom: 8px;
+                        max-height: 100px; overflow-y: auto;">
+                ${pc.note || '메모 없음'}
+            </div>              
                     <!-- 생명력 조절 -->
                     <div class="stat-line" style="display:flex; justify-content:space-between; margin-bottom:5px;">
                         <span>생명력</span> 
