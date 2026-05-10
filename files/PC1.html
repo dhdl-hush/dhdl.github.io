@@ -163,30 +163,29 @@
         <div class="char-info">
             <div class="info-row">
                 <span class="info-label">이름</span>
-                <input type="text" id="char-name" class="info-input" placeholder="이름을 입력하세요" onchange="syncStat()">
+                <!-- onchange를 syncProfile로 변경 -->
+                <input type="text" id="char-name" class="info-input" placeholder="이름을 입력하세요" onchange="syncProfile()">
             </div>
             <div class="info-row">
                 <span class="info-label">생명력</span>
-                <div class="stat-control">
-                    <button class="stat-btn" onclick="changeStat('hp', -1)">-</button>
-                    <span id="hp-val" class="stat-num">6</span>
-                    <button class="stat-btn" onclick="changeStat('hp', 1)">+</button>
+                <div class="stat-control" style="background:none; border:none;">
+                    <span id="hp-val" class="stat-num" style="color:#ff4d4d; font-size:2rem;">6</span>
+                    <span style="color:#444; margin-left:5px;">/ 6</span>
                 </div>
             </div>
             <div class="info-row">
                 <span class="info-label">이성치</span>
-                <div class="stat-control">
-                    <button class="stat-btn" onclick="changeStat('san', -1)">-</button>
-                    <span id="san-val" class="stat-num">6</span>
-                    <button class="stat-btn" onclick="changeStat('san', 1)">+</button>
+                <div class="stat-control" style="background:none; border:none;">
+                    <span id="san-val" class="stat-num" style="color:#ff4d4d; font-size:2rem;">6</span>
+                    <span style="color:#444; margin-left:5px;">/ 6</span>
                 </div>
             </div>
             <div class="info-row">
                 <span class="info-label">특기/기타</span>
-                <input type="text" id="char-note" class="info-input" placeholder="주요 특기 등 메모" onchange="syncStat()">
+                <!-- onchange를 syncProfile로 변경 -->
+                <input type="text" id="char-note" class="info-input" placeholder="주요 특기 등 메모" onchange="syncProfile()">
             </div>
         </div>
-    </div>
     
     <!-- 주사위 섹션 등 기존 코드는 이 아래에 계속... -->
 
@@ -362,51 +361,41 @@ window.closeHandout = function() {
     }
 };
 
-        // 수치 관리 변수
-        let hp = 6;
-        let san = 6;
+        // --- 기능 3: GM과 데이터 실시간 동기화 ---
 
-        // 수치 변경 함수
-        window.changeStat = function(type, amount) {
-            if (type === 'hp') {
-                hp = Math.max(0, hp + amount);
-                document.getElementById('hp-val').innerText = hp;
-            } else {
-                san = Math.max(0, san + amount);
-                document.getElementById('san-val').innerText = san;
+        // 1. GM이 변경한 수치(HP/SAN/이름)를 내 화면에 반영
+        onValue(ref(db, 'room_01/pc1'), (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                // 수치 반영
+                if(data.hp !== undefined) document.getElementById('hp-val').innerText = data.hp;
+                if(data.san !== undefined) document.getElementById('san-val').innerText = data.san;
+                
+                // 이름 반영 (내가 입력 중이 아닐 때만 업데이트)
+                const nameInput = document.getElementById('char-name');
+                if(data.name && document.activeElement !== nameInput) {
+                    nameInput.value = data.name;
+                }
+
+                // 메모 반영 (내가 입력 중이 아닐 때만 업데이트)
+                const noteInput = document.getElementById('char-note');
+                if(data.note && document.activeElement !== noteInput) {
+                    noteInput.value = data.note;
+                }
             }
-            syncStat(); // 서버에 저장
-        };
+        });
 
-        // 서버(Firebase)와 데이터 동기화
-        window.syncStat = function() {
+        // 2. 내가 입력한 이름과 특기를 GM 창으로 전송
+        window.syncProfile = function() {
             const name = document.getElementById('char-name').value;
             const note = document.getElementById('char-note').value;
             
             update(ref(db, 'room_01/pc1'), {
                 name: name || "플레이어1",
-                hp: hp,
-                san: san,
-                note: note,
-                lastUpdate: Date.now()
+                note: note || ""
+            }).then(() => {
+                console.log("프로필 동기화 완료");
             });
-        };
-    // GM이 바꾼 수치를 내 화면에 실시간으로 반영
-        onValue(ref(db, 'room_01/pc1'), (snapshot) => {
-            const data = snapshot.val();
-            if(data) {
-                if(data.hp !== undefined) document.getElementById('hp-val').innerText = data.hp;
-                if(data.san !== undefined) document.getElementById('san-val').innerText = data.san;
-                if(data.name && !document.getElementById('char-name').value) {
-                    document.getElementById('char-name').value = data.name;
-                }
-            }
-        });
-
-        // 이름만 서버로 동기화하는 함수
-        window.syncName = function() {
-            const name = document.getElementById('char-name').value;
-            update(ref(db, 'room_01/pc1'), { name: name });
         };
     </script>
 </body>
