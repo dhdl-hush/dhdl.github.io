@@ -124,6 +124,33 @@
 <!-- 데이터 보관용 (안 보이는 곳에 추가) -->
 <input type="hidden" id="ho-effect-type" value="none">
 <input type="hidden" id="ho-effect-val" value="0">
+
+    <div class="handout-sender" style="border-color: #00ffcc;">
+    <h2 style="color: #00ffcc;">아이템 보급 (진통제/무기/부적)</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+        <div style="text-align:center;">
+            <strong>진통제</strong><br>
+            <button onclick="sendRealItem('pc1', 'painkiller')">PC1</button>
+            <button onclick="sendRealItem('pc2', 'painkiller')">PC2</button>
+            <button onclick="sendRealItem('pc3', 'painkiller')">PC3</button>
+            <button onclick="sendRealItem('pc4', 'painkiller')">PC4</button>
+        </div>
+        <div style="text-align:center;">
+            <strong>무기</strong><br>
+            <button onclick="sendRealItem('pc1', 'weapon')">PC1</button>
+            <button onclick="sendRealItem('pc2', 'weapon')">PC2</button>
+            <button onclick="sendRealItem('pc3', 'weapon')">PC3</button>
+            <button onclick="sendRealItem('pc4', 'weapon')">PC4</button>
+        </div>
+        <div style="text-align:center;">
+            <strong>부적</strong><br>
+            <button onclick="sendRealItem('pc1', 'talisman')">PC1</button>
+            <button onclick="sendRealItem('pc2', 'talisman')">PC2</button>
+            <button onclick="sendRealItem('pc3', 'talisman')">PC3</button>
+            <button onclick="sendRealItem('pc4', 'talisman')">PC4</button>
+        </div>
+    </div>
+</div>
     
 
     <!-- 스크립트 시작 -->
@@ -366,6 +393,23 @@ window.setPreset = function() {
     } else {
         type.value = "none"; val.value = 0;
     }
+};
+
+        // [추가] GM 페이지 전용 아이템 전송 함수
+window.sendRealItem = function(pcId, type) {
+    let itemData = {};
+    if(type === 'painkiller') {
+        itemData = { title: "진통제", effect: { type: "painkiller", val: 1 } };
+    } else if(type === 'weapon') {
+        itemData = { title: "무기", effect: { type: "weapon", val: 0 } };
+    } else if(type === 'talisman') {
+        itemData = { title: "부적", effect: { type: "talisman", val: 0 } };
+    }
+
+    const targetRef = ref(db, `room_01/${pcId}/items`); // /items 경로로 전송
+    push(targetRef, itemData).then(() => {
+        alert(`${pcId.toUpperCase()}에게 ${itemData.title} 전송 완료!`);
+    });
 };
     </script>
 </body>
