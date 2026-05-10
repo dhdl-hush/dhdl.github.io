@@ -234,7 +234,18 @@
             const itemDiv = document.createElement('div');
             itemDiv.className = 'item-slot';
             itemDiv.id = "item-" + itemId;
-            itemDiv.innerText = item.title;
+             let itemHtml = `<span>${item.title}</span>`;
+            
+            // 만약 아이템에 '효과(effect)'가 있다면 [사용] 버튼을 추가로 그려줍니다.
+            if (item.effect) {
+                itemHtml += `
+                    <button class="use-btn" 
+                        onclick="event.stopPropagation(); window.useItem('${itemId}', '${item.effect.type}', ${item.effect.val}, '${item.title}')"
+                        style="background:#b30000; color:white; border:none; padding:3px 7px; cursor:pointer; float:right; font-size:0.7rem; border-radius:2px;">
+                        사용
+                    </button>`;
+            }
+            itemDiv.innerHTML = itemHtml;
             itemDiv.onclick = () => window.showHandout(item.title, item.content, item.secret, shockInfo);
             list.appendChild(itemDiv);
 
