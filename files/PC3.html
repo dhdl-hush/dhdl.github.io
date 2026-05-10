@@ -304,12 +304,15 @@
     } else if (type === 'talisman') {
         update(ref(db, pcPath), { lastDice: "부적 사용!" });
         alert("부적을 사용했습니다. 재굴림 대상을 GM에게 말하세요.");
-    }
-
-    // 사용 후 아이템 삭제
+    // 1. 핸드아웃 폴더에서 삭제 시도
     remove(ref(db, pcPath + '/inventory/' + itemId));
+    
+    // 2. 소모품 아이템 폴더에서 삭제 시도 (민트색 아이템)
+    remove(ref(db, pcPath + '/items/' + itemId)).then(() => {
+        // 성공적으로 삭제되었다면 알림 (선택 사항)
+        console.log("아이템 서버 삭제 완료");
+    });
 };
-
         // --- 아이템 전용 감시 로직 ---
 const itemRef = ref(db, pcPath + '/items'); // 경로를 /items 로 분리
 
