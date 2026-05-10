@@ -48,6 +48,20 @@
 .send-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
 .send-btns button { font-size: 0.7rem; padding: 5px; cursor: pointer; background: #333; color: white; border: none; }
 .send-btns button:hover { background: #b30000; }
+
+        /* GM 페이지 스타일 태그 안에 추가 */
+.insane-card { width: 100%; background: #fff; color: #000; border: 2px solid #000; font-family: sans-serif; }
+.card-header { text-align: center; font-size: 1.1rem; font-weight: bold; border-bottom: 2px solid #000; padding: 5px; }
+.card-info-table { display: grid; grid-template-columns: 60px 1fr; border-bottom: 2px solid #000; }
+.info-label { border-right: 2px solid #000; padding: 3px; font-weight: bold; text-align: center; background: #eee; font-size: 0.8rem; }
+.card-body-title { text-align: center; font-weight: bold; border-bottom: 1px solid #000; padding: 3px; background: #f0f0f0; font-size: 0.8rem; }
+.card-content { min-height: 80px; padding: 10px; line-height: 1.5; text-align: left; white-space: pre-wrap; font-size: 0.85rem; background: #fff; }
+
+.insane-card.secret { background: #000; color: #fff; border-color: #fff; }
+.insane-card.secret .card-header { border-bottom: 2px solid #fff; }
+.insane-card.secret .info-label { background: #222; color: #fff; border-right: 2px solid #fff; }
+.insane-card.secret .card-body-title { background: #000; border-bottom: 1px solid #fff; }
+.insane-card.secret .card-content { background: #000; }
     </style>
 </head>
 <body>
