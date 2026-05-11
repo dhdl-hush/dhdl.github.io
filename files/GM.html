@@ -130,6 +130,20 @@
     </select>
 </div>
 
+    <div class="handout-sender" style="border-color: #ffffff; background: rgba(255,255,255,0.05);">
+    <h2 style="color: #ffffff;">📱 스마트폰 소유권 관리</h2>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+        <button onclick="togglePhone('pc1', true)" style="background:#444; color:white; padding:5px;">PC1 지급</button>
+        <button onclick="togglePhone('pc2', true)" style="background:#444; color:white; padding:5px;">PC2 지급</button>
+        <button onclick="togglePhone('pc3', true)" style="background:#444; color:white; padding:5px;">PC3 지급</button>
+        <button onclick="togglePhone('pc4', true)" style="background:#444; color:white; padding:5px;">PC4 지급</button>
+    </div>
+    <div style="margin-top:5px; text-align:center;">
+        <button onclick="confirm('전원 회수할까요?') && ['pc1','pc2','pc3','pc4'].forEach(id => togglePhone(id, false))" 
+                style="font-size:0.7rem; color:#888; background:none; border:none; cursor:pointer;">전원 회수</button>
+    </div>
+</div>
+
 <!-- 데이터 보관용 (안 보이는 곳에 추가) -->
 <input type="hidden" id="ho-effect-type" value="none">
 <input type="hidden" id="ho-effect-val" value="0">
@@ -594,6 +608,12 @@ window.launchBattle = function() {
                 });
             }
         };
+
+        window.togglePhone = function(pcId, status) {
+    update(ref(db, `room_01/${pcId}`), { hasPhone: status }).then(() => {
+        alert(`${pcId.toUpperCase()}의 스마트폰 상태가 변경되었습니다.`);
+    });
+};
     </script>
 </body>
 </html>
