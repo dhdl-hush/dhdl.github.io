@@ -3,81 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INSANE - PC1</title>
+    <title>INSANE - PC2</title>
     <style>
         /* --- 기본 배경 및 노이즈 효과 --- */
         body { margin: 0; padding: 0; background-color: #050505; color: #d1d1d1; font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); opacity: 0.05; pointer-events: none; z-index: 9999; }
         
-        /* --- 상단 헤더 --- */
         header { width: 100%; padding: 20px; text-align: center; border-bottom: 1px solid #333; background: rgba(10, 10, 10, 0.9); }
-        h1 { color: #b30000; font-size: 1.2rem; letter-spacing: 8px; margin: 0; text-shadow: 0 0 10px rgba(179,0,0,0.5); }
+        h1 { color: #b30000; font-size: 1.2rem; letter-spacing: 8px; margin: 0; }
 
-        /* --- 메인 컨테이너 --- */
-        .container { width: 90%; max-width: 700px; margin: 20px auto; padding: 20px; background: rgba(10, 10, 10, 0.8); border: 1px solid #222; box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); }
+        .container { width: 90%; max-width: 700px; margin: 20px auto; padding: 20px; background: rgba(10, 10, 10, 0.8); border: 1px solid #222; }
 
         /* --- 캐릭터 시트 (상단부) --- */
         .character-sheet { display: grid; grid-template-columns: 100px 1fr; gap: 20px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #222; }
-        .profile-img { width: 100px; height: 130px; background: #000; border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #333; font-size: 0.7rem; border-radius: 2px; }
-        .char-info { display: flex; flex-direction: column; gap: 8px; }
+        .profile-img { width: 100px; height: 130px; background: #000; border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #333; font-size: 0.7rem; }
+        .char-info { display: flex; flex-direction: column; gap: 12px; }
         .info-row { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #1a1a1a; padding-bottom: 5px; }
         .info-label { color: #666; font-size: 0.75rem; width: 50px; letter-spacing: 1px; }
         .info-input { background: transparent; border: none; color: #fff; font-size: 0.9rem; width: 100%; outline: none; }
         
-        /* 스탯(HP/SAN) 디자인 - 눈에 띄지 않게 녹아들게 */
-        .stat-display { display: flex; align-items: baseline; gap: 5px; }
-        .stat-num { font-size: 1.4rem; font-weight: bold; color: #b30000; text-shadow: 0 0 5px rgba(179,0,0,0.3); }
+        /* 스탯(HP/SAN) 디자인 */
+        .stat-display { display: flex; align-items: baseline; gap: 8px; }
+        .stat-num { font-size: 1.8rem; font-weight: bold; color: #b30000; }
         .stat-max { font-size: 0.8rem; color: #444; }
 
-        /* --- 주사위 섹션 (초기 디자인 복구) --- */
+        /* --- 주사위 섹션 --- */
         .dice-section { margin: 30px 0; padding: 20px; border: 1px double #333; text-align: center; background: rgba(15, 15, 15, 0.5); }
         .dice-display { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
-        .die { width: 55px; height: 55px; background: #000; border: 1px solid #b30000; color: #fff; font-size: 1.8rem; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(179,0,0,0.2); }
+        .die { width: 55px; height: 55px; background: #000; border: 1px solid #b30000; color: #fff; font-size: 1.8rem; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         #dice-result { font-size: 1rem; color: #888; margin-bottom: 15px; height: 1.2rem; }
-        .roll-btn { background: transparent; color: #b30000; border: 1px solid #b30000; padding: 10px 40px; cursor: pointer; font-size: 0.9rem; letter-spacing: 4px; transition: 0.3s; }
-        .roll-btn:hover { background: #b30000; color: #fff; box-shadow: 0 0 15px rgba(179,0,0,0.5); }
+        .roll-btn { background: transparent; color: #b30000; border: 1px solid #b30000; padding: 10px 40px; cursor: pointer; font-size: 0.9rem; letter-spacing: 4px; transition: 0.3s; width: 100%; }
+        .roll-btn:hover { background: #b30000; color: #fff; }
         .fumble { color: #ff0000; animation: shake 0.2s infinite; font-weight: bold; }
         .special { color: #00ffcc; text-shadow: 0 0 10px #00ffcc; font-weight: bold; }
         @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -2px); } 100% { transform: translate(1px, -1px); } }
 
-        /* --- 사명 & 비밀 (초기 디자인 복구) --- */
+        /* --- 사명 & 비밀 --- */
         .mission-box { margin-bottom: 25px; border-left: 3px solid #b30000; padding-left: 15px; }
-        .mission-box h3 { color: #888; font-size: 0.8rem; margin: 0 0 8px 0; letter-spacing: 2px; }
-        .mission-box p { font-size: 0.95rem; line-height: 1.6; margin: 0; color: #bbb; }
+        .mission-box h3 { color: #888; font-size: 0.8rem; margin: 0 0 8px 0; }
+        .mission-box p { font-size: 0.95rem; line-height: 1.6; color: #bbb; margin: 0; }
 
-        .secret-section { margin-top: 30px; border: 1px solid #b30000; padding: 20px; background: rgba(179, 0, 0, 0.03); position: relative; }
-        .secret-title { color: #ff4d4d; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .secret-section { margin-top: 30px; border: 1px solid #b30000; padding: 20px; background: rgba(179, 0, 0, 0.03); }
+        .secret-title { color: #ff4d4d; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; }
         .secret-content { font-size: 0.9rem; line-height: 1.7; filter: blur(6px); transition: filter 0.6s ease; user-select: none; color: #ccc; }
         .secret-section:hover .secret-content { filter: blur(0); }
 
-        /* --- 인벤토리 리스트 --- */
-        .inventory-section { margin-top: 40px; }
-        .inventory-title { font-size: 0.8rem; color: #444; letter-spacing: 2px; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 15px; }
+        /* --- 인벤토리 --- */
+        .inventory-title { font-size: 0.8rem; color: #444; letter-spacing: 2px; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 15px; margin-top: 40px; }
         #inventory-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .item-slot { background: #0a0a0a; border: 1px solid #222; padding: 12px; font-size: 0.85rem; cursor: pointer; transition: 0.2s; text-align: center; }
-        .item-slot:hover { border-color: #b30000; color: #fff; background: #150000; }
+        .item-slot { background: #0a0a0a; border: 1px solid #222; padding: 12px; font-size: 0.85rem; cursor: pointer; text-align: center; }
+        .item-slot:hover { border-color: #b30000; background: #150000; }
 
-        /* --- 핸드아웃 모달 (이미지 디자인 적용) --- */
-        /* ...기존에 드린 insane-card 관련 CSS는 그대로 유지하거나 생략 (길이 조절용)... */
-        .insane-card { width: 100%; max-width: 400px; margin: 0 auto; font-family: 'Malgun Gothic', serif; border: 2px solid #000; background: #fff; color: #000; }
+        /* --- 핸드아웃 모달 (인세인 디자인) --- */
+        .insane-card { width: 100%; background: #fff; color: #000; border: 2px solid #000; font-family: 'Malgun Gothic', sans-serif; }
         .card-header { text-align: center; font-size: 1.3rem; font-weight: bold; border-bottom: 2px solid #000; padding: 8px; }
         .card-info-table { display: grid; grid-template-columns: 60px 1fr; border-bottom: 2px solid #000; }
         .info-label-card { border-right: 2px solid #000; padding: 5px; font-weight: bold; text-align: center; background: #f0f0f0; font-size: 0.8rem; }
         .card-content { min-height: 180px; padding: 15px; line-height: 1.7; text-align: left; white-space: pre-wrap; background-image: repeating-linear-gradient(transparent, transparent 27px, #eee 27px, #eee 28px); font-size: 0.9rem; }
         .insane-card.secret-card { background: #000; color: #fff; border-color: #fff; }
         .insane-card.secret-card .card-content { background-image: repeating-linear-gradient(transparent, transparent 27px, #333 27px, #333 28px); }
+
+        /* 추가 시트 디자인 */
+.full-sheet-section { margin-top: 20px; border-top: 2px solid #b30000; padding-top: 20px; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+
+/* 특기표(Specialty) 스타일 */
+.specialty-table { 
+    display: grid; 
+    grid-template-columns: repeat(6, 1fr); 
+    gap: 2px; 
+    background: #333; 
+    border: 1px solid #333;
+    font-size: 0.7rem;
+    margin-bottom: 20px;
+}
+.spec-cat { background: #222; color: #fff; text-align: center; padding: 5px; font-weight: bold; border-bottom: 1px solid #333; }
+.spec-item { 
+    background: #000; color: #aaa; padding: 4px; text-align: center; cursor: pointer;
+    transition: 0.2s;
+}
+.spec-item:hover { background: #1a0000; }
+.spec-item.checked { background: #b30000; color: #fff; font-weight: bold; }
+
+/* 어빌리티 표 스타일 */
+.ability-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; }
+.ability-table th { background: #222; color: #888; padding: 5px; border: 1px solid #333; }
+.ability-table td { border: 1px solid #333; padding: 0; }
+.ability-table input { width: 100%; background: transparent; border: none; color: #fff; padding: 5px; box-sizing: border-box; font-size: 0.75rem; }
+
+        /* 스마트폰 본체 */
+#smartphone-overlay {
+    position: fixed; bottom: 20px; right: 20px;
+    width: 280px; height: 500px;
+    background: #111; border: 8px solid #333; border-radius: 30px;
+    z-index: 20000; box-shadow: 0 0 30px rgba(0,0,0,0.8);
+    display: none; flex-direction: column; overflow: hidden;
+    font-family: sans-serif;
+}
+
+/* 화면 내부 */
+.phone-screen {
+    flex-grow: 1; background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-1.2.1&auto=format&fit=crop&w=280&q=80');
+    background-size: cover; padding: 20px; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 20px;
+}
+
+/* 앱 아이콘 */
+.app-icon {
+    width: 50px; height: 50px; background: rgba(255,255,255,0.2);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; cursor: pointer; transition: 0.2s; backdrop-filter: blur(5px);
+}
+.app-icon:hover { transform: scale(1.1); background: rgba(255,255,255,0.4); }
+.app-label { font-size: 0.6rem; color: white; text-align: center; margin-top: 5px; width: 50px; }
+
+/* 앱 화면 헤더 */
+.app-header {
+    background: #222; padding: 15px; display: none; justify-content: space-between; align-items: center;
+}
+
+/* PC 페이지 <style> 태그 안의 기존 코드를 이걸로 교체 */
+#phone-open-btn {
+    display: none; /* 자바스크립트가 true일 때만 block으로 바꿈 */
+    position: fixed !important;
+    bottom: 30px !important;
+    right: 30px !important;
+    width: 70px !important;
+    height: 70px !important;
+    background: #b30000 !important; /* 눈에 띄는 빨간색으로 변경 */
+    color: white !important;
+    border: 3px solid white !important;
+    border-radius: 50% !important;
+    font-size: 2rem !important;
+    z-index: 999999 !important; /* 모든 요소(노이즈 효과 포함)보다 위에 배치 */
+    cursor: pointer !important;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5) !important;
+}
+        
     </style>
 </head>
 <body>
 
     <div class="overlay"></div>
+    <header><h1>INSANE : CHARACTER SHEET</h1></header>
 
-    <header>
-        <h1>INSANE : CHARACTER SHEET</h1>
-    </header>
+    <!-- 메인 보드 (공개된 핸드아웃) -->
+<div class="container" style="border-color: #0066ff; background: rgba(0, 102, 255, 0.05); margin-bottom: 10px;">
+    <h3 style="color: #0066ff; font-size: 0.8rem; margin-top: 0; letter-spacing: 2px;">MAIN BOARD (공개 정보)</h3>
+    <div id="public-handout-list" style="display: flex; flex-wrap: wrap; gap: 10px;">
+        <span style="color: #444; font-size: 0.8rem;">현재 공개된 정보가 없습니다.</span>
+    </div>
+</div>
 
     <div class="container">
-        <!-- 1. 캐릭터 시트 (수치 조절 버튼 제거, 디자인 통합) -->
+        <!-- 1. 캐릭터 시트 (GM 조절 수치 실시간 수신) -->
         <div class="character-sheet">
             <div class="profile-img">No Image</div>
             <div class="char-info">
@@ -85,7 +163,7 @@
                     <span class="info-label">NAME</span>
                     <input type="text" id="char-name" class="info-input" placeholder="이름을 입력하세요" onchange="syncProfile()">
                 </div>
-                <div style="display: flex; gap: 30px; margin: 5px 0;">
+                <div style="display: flex; gap: 40px; margin: 10px 0;">
                     <div class="stat-display">
                         <span class="info-label">HP</span>
                         <span id="hp-val" class="stat-num">6</span>
@@ -97,14 +175,41 @@
                         <span class="stat-max">/ 6</span>
                     </div>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">NOTE</span>
-                    <input type="text" id="char-note" class="info-input" placeholder="특기 또는 상태 이상" onchange="syncProfile()">
-                </div>
+
+                <!-- 연령, 성별, 직업, 공적점 추가 -->
+<div class="info-grid">
+    <div class="info-row"><span class="info-label">연령</span><input type="text" id="char-age" class="info-input" placeholder="연령" onchange="syncFullSheet()"></div>
+    <div class="info-row"><span class="info-label">성별</span><input type="text" id="char-sex" class="info-input" placeholder="성별" onchange="syncFullSheet()"></div>
+    <div class="info-row"><span class="info-label">직업</span><input type="text" id="char-job" class="info-input" placeholder="직업" onchange="syncFullSheet()"></div>
+    <div class="info-row"><span class="info-label">공적점</span><input type="number" id="char-point" class="info-input" value="0" onchange="syncFullSheet()"></div>
+</div>
+
+<!-- 호기심, 공포심 -->
+<div class="info-grid">
+    <div class="info-row"><span class="info-label" style="color:#00ffcc">호기심</span><input type="text" id="char-curiosity" class="info-input" placeholder="지정 특기" onchange="syncFullSheet()"></div>
+    <div class="info-row"><span class="info-label" style="color:#ff4d4d">공포심</span><input type="text" id="char-fear" class="info-input" placeholder="공포 판정 요소" onchange="syncFullSheet()"></div>
+</div>
+
+<!-- 어빌리티 섹션 -->
+<h4 style="font-size:0.8rem; color:#888; margin-bottom:5px;">어빌리티 리스트</h4>
+<table class="ability-table">
+    <tr><th style="width:25%">이름</th><th style="width:15%">타입</th><th>효과</th></tr>
+    <tr><td><input type="text" id="ab-name-1" onchange="syncFullSheet()"></td><td><input type="text" id="ab-type-1" onchange="syncFullSheet()"></td><td><input type="text" id="ab-effect-1" onchange="syncFullSheet()"></td></tr>
+    <tr><td><input type="text" id="ab-name-2" onchange="syncFullSheet()"></td><td><input type="text" id="ab-type-2" onchange="syncFullSheet()"></td><td><input type="text" id="ab-effect-2" onchange="syncFullSheet()"></td></tr>
+    <tr><td><input type="text" id="ab-name-3" onchange="syncFullSheet()"></td><td><input type="text" id="ab-type-3" onchange="syncFullSheet()"></td><td><input type="text" id="ab-effect-3" onchange="syncFullSheet()"></td></tr>
+</table>
+            
+        <div class="info-row" style="align-items: flex-start; flex-direction: column; border-bottom: none; height: auto;">
+            <span class="info-label" style="margin-bottom: 8px; width: 100%;">NOTE / 특기</span>
+            <textarea id="char-note" class="info-input" 
+                  style="height: 100px; background: rgba(255,255,255,0.05); border: 1px solid #333; padding: 10px; resize: none; line-height: 1.6; width: 100%; box-sizing: border-box; display: block;" 
+                  placeholder="특기, 광기 등 내용을 입력하세요" 
+                  onchange="syncProfile()"></textarea>
+    </div>
             </div>
         </div>
 
-        <!-- 2. 주사위 판정 (초기 디자인) -->
+        <!-- 2. 주사위 판정 -->
         <div class="dice-section">
             <div class="dice-display">
                 <div id="die1" class="die">?</div>
@@ -114,36 +219,38 @@
             <button class="roll-btn" id="roll-btn">ROLL DICE</button>
         </div>
 
-        <!-- 3. 사명 & 비밀 (초기 디자인) -->
+        <!-- 3. 사명 & 비밀 -->
         <div class="mission-box">
             <h3>공개 사명</h3>
             <p>당신의 사명은 이 저택에서 무사히 살아나가는 것입니다.</p>
         </div>
-
         <div class="secret-section">
             <div class="secret-title">⚠️ [비밀: 쇼크 - 정신 오염]</div>
-            <div class="secret-content">
-                사실 당신은 이 저택의 주인을 죽인 범인입니다. <br>
-                당신의 진짜 사명은 자신의 정체가 들키지 않은 채 다른 사람들을 모두 희생시키는 것입니다.
-            </div>
+            <div class="secret-content">내용을 입력하세요 (마우스 오버 시 보임)</div>
         </div>
 
         <!-- 4. 인벤토리 -->
-        <div class="inventory-section">
-            <div class="inventory-title">INVENTORY</div>
-            <div id="inventory-list">
-                <!-- 아이템이 여기에 추가됨 -->
-            </div>
+        <div class="inventory-title">INVENTORY</div>
+        <div id="inventory-list">
+            <!-- 핸드아웃 아이템이 여기에 추가됨 -->
         </div>
     </div>
+    <!-- [추가] 아이템 전용 구역 (인벤토리 구역 근처에 넣으세요) -->
+<div class="container" style="margin-top: 20px;">
+    <h3 style="color: #00ffcc; border-bottom: 1px solid #333;">아이템 (소모품)</h3>
+    <div id="pc-item-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+        <!-- 진통제, 무기 등은 여기에 따로 쌓입니다 -->
+        <p style="color: #444; font-size: 0.8rem;">보유 중인 아이템이 없습니다.</p>
+    </div>
+</div>
+    
 
-    <!-- 핸드아웃 모달 (디자인 포함) -->
+    <!-- 핸드아웃 모달 -->
     <div id="handout-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10000; width:90%; max-width:400px;">
         <div id="card-front" class="insane-card">
             <div class="card-header">Handout</div>
             <div class="card-info-table">
-                <div class="info-label-card">이름</div>
-                <div class="info-value" id="modal-title" style="padding:5px 10px;"></div>
+                <div class="info-label-card">이름</div><div class="info-value" id="modal-title" style="padding:5px 10px;"></div>
             </div>
             <div style="text-align:center; background:#eee; font-size:0.8rem; font-weight:bold; padding:3px; border-bottom:1px solid #000;">사 명</div>
             <div class="card-content" id="modal-content"></div>
@@ -154,16 +261,43 @@
             <div class="card-info-table" style="border-color:#fff;"><div class="info-label-card" style="background:#222; color:#fff; border-color:#fff;">비밀</div><div class="info-value"></div></div>
             <div class="card-info-table" style="border-color:#fff;"><div class="info-label-card" style="background:#222; color:#fff; border-color:#fff;">쇼크</div><div id="modal-shock" style="padding:5px 10px;"></div></div>
             <div class="card-content" id="modal-secret-text"></div>
-            <div style="padding:10px; text-align:center; font-size:0.7rem;">이 비밀을 스스로 밝힐 수는 없다.</div>
+            <div style="padding:10px; text-align:center; font-size:0.7rem; color:#888;">이 비밀을 스스로 밝힐 수는 없다.</div>
         </div>
         <button onclick="closeHandout()" style="width:100%; margin-top:10px; padding:10px; background:#333; color:#fff; border:none; cursor:pointer;">창 닫기</button>
     </div>
 
+    <!-- 스마트폰 열기 버튼 -->
+<button id="phone-open-btn" onclick="togglePhoneUI()">📱</button>
+
+<!-- 스마트폰 본체 -->
+<div id="smartphone-overlay">
+    <!-- 앱 상단바 (뒤로가기 등) -->
+    <div id="phone-app-header" class="app-header">
+        <span onclick="closeApp()" style="cursor:pointer;">◀</span>
+        <span id="app-title">HOME</span>
+        <span>●</span>
+    </div>
+
+    <!-- 홈 화면 -->
+    <div id="phone-home" class="phone-screen">
+        <div onclick="openApp('internet', '🌐')"><div class="app-icon">🌐</div><div class="app-label">인터넷</div></div>
+        <div onclick="openApp('sns', '📱')"><div class="app-icon" style="background:#1da1f2;">🐦</div><div class="app-label">SNS</div></div>
+        <div onclick="openApp('contacts', '👥')"><div class="app-icon" style="background:#4cd964;">👥</div><div class="app-label">연락처</div></div>
+        <div onclick="openApp('message', '💬')"><div class="app-icon" style="background:#ffcc00;">💬</div><div class="app-label">문자</div></div>
+    </div>
+
+    <!-- 앱 실행 화면 (기본 숨김) -->
+    <div id="phone-app-content" style="display:none; flex-grow:1; background:white; color:black; padding:15px; overflow-y:auto;">
+        <!-- 여기에 앱 내용이 들어감 -->
+    </div>
+</div>
+
     <!-- 파이어베이스 로직 -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, update, onValue, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, update, onValue, onChildAdded, onChildRemoved, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+    // ⚠️ 본인의 콘솔 값으로 채우세요!
         const firebaseConfig = {
           apiKey: "AIzaSyAUjW1D8bQ_P1o0GQpSo2zAswwA7SvT97I",
           authDomain: "dhdl-48b4a.firebaseapp.com",
@@ -173,16 +307,19 @@
           appId: "1:970954764585:web:7388d241cc77ec70dd8738",
           measurementId: "G-DV6XRPBJV4"
         };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
 
-        const btn = document.getElementById('roll-btn');
-        const resBox = document.getElementById('dice-result');
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    
+    // ⚠️ 파일마다 확인! PC1.html이면 pc1, PC3.html이면 pc3로 고치세요.
+    const pcPath = 'room_01/pc2'; 
 
-        // --- 1. 주사위 기능 ---
+    // --- 1. 주사위 기능 ---
+    const btn = document.getElementById('roll-btn');
+    const resBox = document.getElementById('dice-result');
+    if (btn) {
         btn.addEventListener('click', () => {
-            btn.disabled = true;
-            resBox.innerText = "판정 중...";
+            btn.disabled = true; resBox.innerText = "판정 중...";
             let count = 0;
             const timer = setInterval(() => {
                 document.getElementById('die1').innerText = Math.floor(Math.random() * 6) + 1;
@@ -196,69 +333,434 @@
                     if (total === 2) resBox.innerHTML = `<span class="fumble">펌블 (2)</span>`;
                     else if (total === 12) resBox.innerHTML = `<span class="special">스페셜 (12)</span>`;
                     else resBox.innerHTML = `결과: ${total}`;
-                    update(ref(db, 'room_01/pc1'), { lastDice: total });
+                    update(ref(db, pcPath), { lastDice: total });
                     btn.disabled = false;
                 }
             }, 50);
         });
+    }
 
-        // --- 2. 동기화 (GM -> PC) ---
-        onValue(ref(db, 'room_01/pc1'), (snapshot) => {
-            const data = snapshot.val();
-            if(data) {
-                if(data.hp !== undefined) document.getElementById('hp-val').innerText = data.hp;
-                if(data.san !== undefined) document.getElementById('san-val').innerText = data.san;
-                if(data.name && document.activeElement !== document.getElementById('char-name')) {
-                    document.getElementById('char-name').value = data.name;
-                }
-                if(data.note && document.activeElement !== document.getElementById('char-note')) {
-                    document.getElementById('char-note').value = data.note;
-                }
-            }
-        });
+    // --- 2. 데이터 실시간 동기화 (모든 수치 반영) ---
+    onValue(ref(db, pcPath), (snapshot) => {
+        const data = snapshot.val();
+        if(!data) return;
 
-        window.syncProfile = () => {
-            update(ref(db, 'room_01/pc1'), {
-                name: document.getElementById('char-name').value,
-                note: document.getElementById('char-note').value
-            });
+        // [A] 기본 수치 반영
+        if(data.hp !== undefined) document.getElementById('hp-val').innerText = data.hp;
+        if(data.san !== undefined) document.getElementById('san-val').innerText = data.san;
+        
+        // [B] 입력 필드들 반영 (내가 입력 중일 때는 건너뜀)
+        const inputs = {
+            'char-name': data.name,
+            'char-age': data.age,
+            'char-sex': data.sex,
+            'char-job': data.job,
+            'char-point': data.point,
+            'char-curiosity': data.curiosity,
+            'char-fear': data.fear,
+            'char-note': data.note
         };
+        for(let id in inputs) {
+            const el = document.getElementById(id);
+            if(el && data[id.replace('char-','')] !== undefined && document.activeElement !== el) {
+                el.value = data[id.replace('char-','')] || "";
+            }
+        }
 
-        // --- 3. 핸드아웃 수신 ---
-        const invRef = ref(db, 'room_01/pc1/inventory');
-        let isInitialLoad = true;
-        onValue(invRef, () => { isInitialLoad = false; }, { onlyOnce: true });
+        // [C] 어빌리티 반영
+        for(let i=1; i<=3; i++) {
+            const ab = data['ab'+i];
+            if(ab) {
+                if(document.activeElement !== document.getElementById('ab-name-'+i)) document.getElementById('ab-name-'+i).value = ab.name || "";
+                if(document.activeElement !== document.getElementById('ab-type-'+i)) document.getElementById('ab-type-'+i).value = ab.type || "";
+                if(document.activeElement !== document.getElementById('ab-effect-'+i)) document.getElementById('ab-effect-'+i).value = ab.effect || "";
+            }
+        }
 
-        onChildAdded(invRef, (snapshot) => {
-            const item = snapshot.val();
-            const list = document.getElementById('inventory-list');
-            const shockInfo = `${item.trigger || '전원'} / ${item.shock || '없음'}`;
+        // [D] 📱 스마트폰 소유권 체크 (여기가 핵심!)
+        const phoneBtn = document.getElementById('phone-open-btn');
+        const phoneOverlay = document.getElementById('smartphone-overlay');
+        if (data.hasPhone === true) {
+            phoneBtn.style.display = "block"; // GM이 주면 나타남
+        } else {
+            phoneBtn.style.display = "none";
+            phoneOverlay.style.display = "none"; // 뺏으면 닫힘
+        }
+    });
+
+    // --- 3. 데이터 전송 함수들 ---
+    window.syncProfile = window.syncFullSheet = function() {
+        const data = {
+            name: document.getElementById('char-name').value,
+            age: document.getElementById('char-age').value,
+            sex: document.getElementById('char-sex').value,
+            job: document.getElementById('char-job').value,
+            point: document.getElementById('char-point').value,
+            curiosity: document.getElementById('char-curiosity').value,
+            fear: document.getElementById('char-fear').value,
+            note: document.getElementById('char-note').value,
+            ab1: { name: document.getElementById('ab-name-1').value, type: document.getElementById('ab-type-1').value, effect: document.getElementById('ab-effect-1').value },
+            ab2: { name: document.getElementById('ab-name-2').value, type: document.getElementById('ab-type-2').value, effect: document.getElementById('ab-effect-2').value },
+            ab3: { name: document.getElementById('ab-name-3').value, type: document.getElementById('ab-type-3').value, effect: document.getElementById('ab-effect-3').value }
+        };
+        update(ref(db, pcPath), data);
+    };
+
+    // --- 4. 핸드아웃 & 아이템 관리 ---
+    const invRef = ref(db, pcPath + '/inventory');
+    const itemRef = ref(db, pcPath + '/items');
+    let isInitialLoad = true;
+    onValue(invRef, () => { isInitialLoad = false; }, { onlyOnce: true });
+
+    // 핸드아웃 수신
+    onChildAdded(invRef, (snapshot) => {
+        const item = snapshot.val();
+        const list = document.getElementById('inventory-list');
+        if(list.querySelector('p')) list.innerHTML = "";
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item-slot'; itemDiv.id = "item-" + snapshot.key;
+        itemDiv.innerText = item.title;
+        itemDiv.onclick = () => window.showHandout(item.title, item.content, item.secret, `${item.trigger || '전원'} / ${item.shock || '없음'}`);
+        list.appendChild(itemDiv);
+        if (!isInitialLoad) window.showHandout(item.title, item.content, item.secret, `${item.trigger || '전원'} / ${item.shock || '없음'}`);
+    });
+    onChildRemoved(invRef, (snapshot) => { document.getElementById("item-" + snapshot.key)?.remove(); });
+
+    // 소모품 아이템 수신
+    onChildAdded(itemRef, (snapshot) => {
+        const item = snapshot.val();
+        const list = document.getElementById('pc-item-list');
+        if(list.querySelector('p')) list.innerHTML = "";
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item-slot'; itemDiv.id = "real-item-" + snapshot.key;
+        itemDiv.style.borderColor = "#00ffcc";
+        itemDiv.innerHTML = `<div style="color:#00ffcc; font-weight:bold;">${item.title}</div><button class="use-btn" onclick="window.useItem('${snapshot.key}', '${item.effect.type}', ${item.effect.val}, '${item.title}')" style="width:100%; background:#00ffcc; border:none; cursor:pointer;">사용</button>`;
+        list.appendChild(itemDiv);
+    });
+    onChildRemoved(itemRef, (snapshot) => { document.getElementById("real-item-" + snapshot.key)?.remove(); });
+
+    // 아이템 사용
+    window.useItem = function(itemId, type, val, title) {
+        if(!confirm(`[${title}] 아이템을 사용하시겠습니까?`)) return;
+        const hp = parseInt(document.getElementById('hp-val').innerText);
+        const san = parseInt(document.getElementById('san-val').innerText);
+        if (type === 'painkiller') {
+            if(confirm("생명력을 회복(확인) / 이성치를 회복(취소)")) update(ref(db, pcPath), { hp: Math.min(6, hp + 1) });
+            else update(ref(db, pcPath), { san: Math.min(6, san + 1) });
+        } else if (type === 'weapon') { document.getElementById('roll-btn').disabled = false; alert("재굴림 가능!"); }
+        else if (type === 'talisman') { update(ref(db, pcPath), { lastDice: "부적 사용!" }); }
+        remove(ref(db, pcPath + '/items/' + itemId));
+        remove(ref(db, pcPath + '/inventory/' + itemId));
+    };
+
+    // --- 5. 스마트폰 & 메인보드 제어 ---
+    let isPhoneOpen = false;
+    window.togglePhoneUI = () => {
+        const p = document.getElementById('smartphone-overlay');
+        isPhoneOpen = !isPhoneOpen; p.style.display = isPhoneOpen ? "flex" : "none";
+        if(!isPhoneOpen) window.closeApp();
+    };
+    // ================================================================
+// 📱 스마트폰 컨텐츠 설정 (여기서 내용을 마음대로 수정하세요!)
+// ================================================================
+const PHONE_DB = {
+    internet: {
+        // 구글 검색 결과에 뜰 리스트
+        search_results: [
+            { id: 'wiki', title: "키사라기역 - 위키백과", url: "ko.wikipedia.org > wiki > 키사라기역", desc: "키사라기역(如月駅)은 일본의 인터넷 커뮤니티 2채널을 중심으로 퍼진 도시전설 속의 유령역입니다..." },
+            { id: 'ch2', title: "[실황] 지금 이상한 역에 내렸는데... (2ch)", url: "bbs.2ch.net > occ > 12345678", desc: "ID:Hasumi. 전차가 멈추지 않아. 벌써 20분째 달리고 있어. 방금 '키사라기역'이라는 곳에 내렸는데..." },
+            { id: 'news', title: "시즈오카현 노선에서 실종자 속출, 경찰 조사 중", url: "shizuoka-news.jp > local", desc: "시즈오카현 내 특정 철도 노선 이용객들이 행방불명되는 사건이 잇따라 발생하고 있어 당국이..." }
+        ],
+        // 위키 상세 내용
+        wiki_content: `
+            <div style="padding:10px; font-family:serif;">
+                <h2 style="border-bottom:1px solid #aaa;">키사라기역</h2>
+                <p style="font-size:0.85rem; line-height:1.6;">일본의 철도 노선에 존재하지 않는 유령역. 2004년 2ch 스레드에 올라온 실황 글이 시초가 되었다.</p>
+                <p style="font-size:0.85rem; line-height:1.6;"><b>개요:</b> 하스미(葉純)라는 닉네임의 여성이 신하마마츠역에서 승차한 뒤, 존재하지 않는 무인역에 내려 겪은 일들을 실시간으로 올리며 유명해졌다.</p>
+            </div>
+        `,
+        // 2ch 상세 내용
+        ch2_content: `
+            <div style="background:#efefef; padding:10px; min-height:100%;">
+                <h4 style="color:red; border-bottom:1px solid #ccc;">【실황】 지금 이상한 역에 내렸는데..</h4>
+                <div style="font-size:0.75rem; margin-bottom:10px; border-bottom:1px dashed #aaa; padding-bottom:5px;">
+                    <b>1: ID:Hasumi (2004/01/08 23:12)</b><br>
+                    기분 탓일지도 모르겠지만, 아까부터 전차가 멈추질 않아. 
+                </div>
+                <div style="font-size:0.75rem; margin-bottom:10px; border-bottom:1px dashed #aaa; padding-bottom:5px;">
+                    <b>15: ID:Hasumi (2004/01/09 00:05)</b><br>
+                    '키사라기역' 이라는 곳에 내렸어. 무인역이야.
+                </div>
+            </div>
+        `
+    },
+    // [2] SNS(트위터) 앱 내용
+    sns: [
+        { user: "뉴스봇", handle: "@news_daily", text: "[속보] 시즈오카현 내 원인 불명의 실종 사건 발생. 경찰 당국 주시 중.", time: "2시간 전" },
+        { user: "익명", handle: "@user_778", text: "방금 키사라기역이라는 곳에 내렸는데... 전파가 잘 안 터지네. 근데 여기 벽보에 왠 글자가 써있어. '/* ━━━━ PC2이름 한글자 ━━━━ */' 라고... 누구 이름인가?", time: "45분 전" },
+        { user: "괴담러", handle: "@horror_fan", text: "키사라기역 괴담 정리: 1. 북소리가 들린다. 2. 한 다리 노인을 만난다. 3. 터널을 지나면...", time: "10분 전" }
+    ],
+    calls: {
+        "경찰": "......여보세요? 아, 또 지지직거리는군. 이봐! 장난전화는 처벌 대상이야! (치익-)",
+        "택시": "키사라기역...이요? 거긴 저희 영업 구역이 아닙니다. 아니, 애초에 그런 역은 없어요.",
+        "부모님": "어머, 왜 전화를 안 받니? 지금 어디야? 아빠랑 같이 기다리고 있어. 빨리 돌아오렴."
+    },
+    messages: [
+        { 
+            sender: "엄마", 
+            lastText: "어디니? 밥 먹어야지.", 
+            chatHistory: [
+                { type: "in", text: "어디니? 밥 먹어야지." }
+            ],
+            choices: [
+                { text: "지금 전차 안이야.", reply: "그래, 조심해서 오렴. 근데 전차가 왜 이렇게 오래 걸리니?" },
+                { text: "이상한 역에 내렸어.", reply: "장난치지 말고. 빨리 집으로 와. 무서운 세상이다." }
+            ]
+        },
+        { 
+            sender: "친구", 
+            lastText: "야 너 아까 누구랑 같이 있었냐?", 
+            chatHistory: [
+                { type: "in", text: "야 너 아까 누구랑 같이 있었냐? 혼자 아니었어?" }
+            ],
+            choices: [
+                { text: "무슨 소리야? 나 혼자였어.", reply: "그래? 분명 네 뒤에 누가 서있는 거 같았는데..." },
+                { text: "말하기 복잡해.", reply: "하여간 수상해. 나중에 술이나 사." }
+            ]
+        }
+    ]
+};
+
+let currentChatIndex = null;
+
+        
+// ================================================================
+
+
+// --- 스마트폰 앱 실행 (통합 및 오타 수정 버전) ---
+window.openApp = function(appName) {
+    document.getElementById('phone-home').style.display = "none";
+    document.getElementById('phone-app-header').style.display = "flex";
+    const content = document.getElementById('phone-app-content');
+    content.style.display = "block";
+    content.style.background = "#fff";
+    document.getElementById('app-title').innerText = appName.toUpperCase();
+
+    if(appName === 'internet') {
+        renderGoogleSearch();
+    } else if(appName === 'sns') {
+        renderTwitter();
+    } else if(appName === 'contacts') {
+        renderContacts();
+    } else if(appName === 'message') {
+        renderMessageList();
+    }
+};
+
+// [1] 인터넷: 구글 디자인
+function renderGoogleSearch() {
+    const content = document.getElementById('phone-app-content');
+    content.innerHTML = `
+        <div style="text-align:center; padding:10px 0;">
+            <span style="font-size:1.5rem; font-weight:bold;"><span style="color:#4285F4;">G</span><span style="color:#EA4335;">o</span><span style="color:#FBBC05;">o</span><span style="color:#4285F4;">g</span><span style="color:#34A853;">l</span><span style="color:#EA4335;">e</span></span>
+            <div style="margin:10px auto; width:90%; border:1px solid #ddd; border-radius:20px; padding:8px 15px; text-align:left; font-size:0.8rem; box-shadow:0 1px 3px rgba(0,0,0,0.1);">키사라기역</div>
+        </div>
+        <div style="background:#f1f1f1; height:5px; margin:10px 0;"></div>
+        <div style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;" onclick="renderSub('wiki')">
+            <div style="font-size:0.6rem; color:#202124;">ko.wikipedia.org > wiki</div>
+            <div style="font-size:1rem; color:#1a0dab;">키사라기역 - 위키백과</div>
+            <div style="font-size:0.75rem; color:#4d5156;">존재하지 않는 유령역에 대한 도시전설...</div>
+        </div>
+        <div style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;" onclick="renderSub('ch2')">
+            <div style="font-size:0.6rem; color:#202124;">bbs.2ch.net > occ</div>
+            <div style="font-size:1rem; color:#1a0dab;">[실황] 지금 이상한 역에 내렸는데...</div>
+            <div style="font-size:0.75rem; color:#4d5156;">ID:Hasumi. 전차가 멈추지 않아...</div>
+        </div>
+    `;
+}
+
+// [2] SNS: 트위터 디자인
+function renderTwitter() {
+    const content = document.getElementById('phone-app-content');
+    let html = `<div style="border-bottom:1px solid #eee; padding:10px; font-weight:bold; font-size:1.1rem;">실시간 트렌드</div>`;
+    PHONE_DB.sns.forEach(tweet => {
+        html += `
+            <div style="display:flex; padding:12px; border-bottom:1px solid #eee;">
+                <div style="width:40px; height:40px; background:#ddd; border-radius:50%; margin-right:10px;"></div>
+                <div style="flex:1;">
+                    <div style="font-size:0.85rem;"><b>${tweet.user}</b> <span style="color:#666;">${tweet.handle} · ${tweet.time}</span></div>
+                    <div style="font-size:0.9rem; margin-top:3px; line-height:1.4;">${tweet.text}</div>
+                    <div style="display:flex; gap:20px; margin-top:10px; color:#666; font-size:0.8rem;"><span>💬 4</span> <span>🔄 12</span> <span>❤️ 28</span></div>
+                </div>
+            </div>`;
+    });
+    content.innerHTML = html;
+}
+
+// [3] 연락처 & 전화: iOS 통화 스타일
+function renderContacts() {
+    const content = document.getElementById('phone-app-content');
+    content.innerHTML = Object.keys(PHONE_DB.calls).map(name => 
+        `<div onclick="makeCall('${name}')" style="padding:15px; border-bottom:1px solid #eee; cursor:pointer; font-size:1rem;">👤 ${name}</div>`
+    ).join('');
+}
+
+window.makeCall = function(name) {
+    const content = document.getElementById('phone-app-content');
+    content.style.background = "#1a1a1a";
+    content.style.color = "#fff";
+    content.innerHTML = `
+        <div style="text-align:center; padding-top:60px;">
+            <div style="width:80px; height:80px; background:#444; border-radius:50%; margin:0 auto 20px;"></div>
+            <div style="font-size:1.8rem; font-weight:bold;">${name}</div>
+            <p id="call-status">연결 중...</p>
+            <div style="margin-top:150px; background:#ff3b30; width:60px; height:60px; border-radius:50%; line-height:60px; font-size:2rem; margin:150px auto 0; cursor:pointer;" onclick="openApp('contacts')">📵</div>
+        </div>
+    `;
+    setTimeout(() => {
+        const status = document.getElementById('call-status');
+        if(status) {
+            status.innerText = "00:04";
+            const msg = document.createElement('p');
+            msg.style.padding = "20px";
+            msg.style.fontStyle = "italic";
+            msg.style.lineHeight = "1.6";
+            msg.innerText = `"${PHONE_DB.calls[name] || "......"}"`;
+            status.after(msg);
+        }
+    }, 2000);
+};
+
+// [4] 문자: iMessage 스타일
+function renderMessageList() {
+    const content = document.getElementById('phone-app-content');
+    content.innerHTML = `<h2 style="padding:10px;">메시지</h2>`;
+    PHONE_DB.messages.forEach((m, idx) => {
+        content.innerHTML += `
+            <div onclick="openChat(${idx})" style="padding:15px; border-bottom:1px solid #eee; cursor:pointer; display:flex; align-items:center;">
+                <div style="width:45px; height:45px; background:#ccc; border-radius:50%; margin-right:12px;"></div>
+                <div style="flex:1;">
+                    <div style="font-weight:bold;">${m.sender}</div>
+                    <div style="font-size:0.8rem; color:#888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:150px;">${m.lastText}</div>
+                </div>
+                <div style="color:#aaa; font-size:0.7rem;">어제</div>
+            </div>`;
+    });
+}
+
+window.openChat = function(idx) {
+    currentChatIndex = idx;
+    const chat = PHONE_DB.messages[idx];
+    document.getElementById('app-title').innerHTML = `<span onclick="openApp('message')" style="cursor:pointer;">⬅ ${chat.sender}</span>`;
+    const content = document.getElementById('phone-app-content');
+    content.innerHTML = `<div id="chat-bubbles" style="display:flex; flex-direction:column; gap:10px; padding:10px;"></div><div id="chat-choices" style="position:absolute; bottom:0; left:0; width:100%; background:#f4f4f4; padding:10px; box-sizing:border-box;"></div>`;
+    
+    const bubbleArea = document.getElementById('chat-bubbles');
+    chat.chatHistory.forEach(msg => {
+        const side = msg.type === 'in' ? 'flex-start' : 'flex-end';
+        const color = msg.type === 'in' ? '#e9e9eb' : '#007aff';
+        const textColor = msg.type === 'in' ? '#000' : '#fff';
+        bubbleArea.innerHTML += `<div style="align-self:${side}; background:${color}; color:${textColor}; padding:8px 15px; border-radius:18px; max-width:70%; font-size:0.9rem;">${msg.text}</div>`;
+    });
+
+    const choiceArea = document.getElementById('chat-choices');
+    if (chat.choices) {
+        choiceArea.innerHTML = `<p style="font-size:0.7rem; color:#888; margin-bottom:5px;">답장 선택하기</p>`;
+        chat.choices.forEach((c, cIdx) => {
+            choiceArea.innerHTML += `<button onclick="sendReply(${cIdx})" style="width:100%; margin-bottom:5px; padding:8px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer;">${c.text}</button>`;
+        });
+    }
+};
+
+window.sendReply = function(cIdx) {
+    const chat = PHONE_DB.messages[currentChatIndex];
+    const choice = chat.choices[cIdx];
+    
+    // 내 답변 추가
+    chat.chatHistory.push({ type: "out", text: choice.text });
+    // 선택지 제거 (일회용)
+    chat.choices = null;
+    
+    openChat(currentChatIndex); // 화면 갱신
+
+    // 1.5초 뒤 상대방 응답 추가
+    setTimeout(() => {
+        chat.chatHistory.push({ type: "in", text: choice.reply });
+        chat.lastText = choice.reply;
+        openChat(currentChatIndex);
+    }, 1500);
+};
+
+// [공통] 검색 상세 페이지
+window.renderSub = function(type) {
+    const content = document.getElementById('phone-app-content');
+    document.getElementById('app-title').innerHTML = `<span onclick="openApp('internet')" style="cursor:pointer;">⬅ SEARCH</span>`;
+    if(type === 'wiki') content.innerHTML = PHONE_DB.internet.wiki_content;
+    else if(type === 'ch2') content.innerHTML = PHONE_DB.internet.ch2_content;
+};
+window.makeCall = function(name) {
+    const content = document.getElementById('phone-app-content');
+    content.innerHTML = `<div style="text-align:center; margin-top:50px;"><h3>${name}</h3><p>연결 중...</p></div>`;
+    setTimeout(() => {
+        content.innerHTML = `<div style="text-align:center; margin-top:50px;"><h3>${name}</h3><hr><p style="padding:20px; font-style:italic;">"${PHONE_DB.calls[name] || "......"}"</p><button onclick="openApp('contacts')" style="margin-top:20px;">종료</button></div>`;
+    }, 1500);
+};
+
+window.closeApp = function() {
+    document.getElementById('phone-home').style.display = "flex";
+    document.getElementById('phone-app-header').style.display = "none";
+    document.getElementById('phone-app-content').style.display = "none";
+};
+
+        // --- [수정] 스마트폰 소유권 전용 감시 로직 ---
+// pcPath + '/hasPhone'을 직접 감시해서 더 정확하게 반응하게 합니다.
+onValue(ref(db, pcPath + '/hasPhone'), (snapshot) => {
+    const hasPhone = snapshot.val();
+    const phoneBtn = document.getElementById('phone-open-btn');
+    const phoneOverlay = document.getElementById('smartphone-overlay');
+
+    console.log("현재 스마트폰 소유 상태:", hasPhone); // F12 콘솔에서 확인용
+
+    if (hasPhone === true) {
+        // 소유권이 있으면 버튼을 보이게 함
+        phoneBtn.style.setProperty('display', 'block', 'important');
+    } else {
+        // 소유권이 없으면 버튼과 폰 화면을 모두 숨김
+        phoneBtn.style.display = "none";
+        phoneOverlay.style.display = "none";
+    }
+});
+
+    // 메인보드 감시
+    onValue(ref(db, 'room_01/public_handouts'), (snapshot) => {
+        const list = document.getElementById('public-handout-list');
+        const data = snapshot.val();
+        list.innerHTML = data ? "" : '<span style="color: #444; font-size: 0.8rem;">현재 공개된 정보가 없습니다.</span>';
+        for(let id in data) {
             const itemDiv = document.createElement('div');
-            itemDiv.className = 'item-slot';
-            itemDiv.innerText = item.title;
-            itemDiv.onclick = () => window.showHandout(item.title, item.content, item.secret, shockInfo);
+            itemDiv.className = 'item-slot'; itemDiv.style.borderColor = "#0066ff"; itemDiv.innerText = data[id].title;
+            itemDiv.onclick = () => window.showHandout(data[id].title, data[id].content, "비밀 없음", "없음");
             list.appendChild(itemDiv);
-            if (!isInitialLoad) window.showHandout(item.title, item.content, item.secret, shockInfo);
-        });
+        }
+    });
 
-        window.showHandout = (title, content, secret, shock) => {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-content').innerText = content;
-            document.getElementById('modal-secret-text').innerText = secret;
-            document.getElementById('modal-shock').innerText = shock;
-            document.getElementById('card-front').style.display = "block";
-            document.getElementById('card-back').style.display = "none";
-            document.getElementById('handout-modal').style.display = "block";
-        };
+    // 전투 이동 감시
+    onValue(ref(db, 'room_01/battle/active'), (snap) => {
+        if (snap.val() === true) window.location.href = `WAR.html?id=${pcPath.split('/').pop()}`;
+    });
 
-        window.revealSecretInModal = () => {
-            if(confirm("비밀을 확인하시겠습니까?")) {
-                document.getElementById('card-front').style.display = "none";
-                document.getElementById('card-back').style.display = "block";
-            }
-        };
-
-        window.closeHandout = () => { document.getElementById('handout-modal').style.display = "none"; };
-    </script>
+    // 팝업 공통
+    window.showHandout = (t, c, s, sh) => {
+        document.getElementById('modal-title').innerText = t;
+        document.getElementById('modal-content').innerText = c;
+        document.getElementById('modal-secret-text').innerText = s;
+        document.getElementById('modal-shock').innerText = sh;
+        document.getElementById('card-front').style.display = "block";
+        document.getElementById('card-back').style.display = "none";
+        document.getElementById('handout-modal').style.display = "block";
+    };
+    window.revealSecretInModal = () => { if(confirm("비밀을 보시겠습니까?")) { document.getElementById('card-front').style.display = "none"; document.getElementById('card-back').style.display = "block"; } };
+    window.closeHandout = () => { document.getElementById('handout-modal').style.display = "none"; };
+</script>
 </body>
 </html>
