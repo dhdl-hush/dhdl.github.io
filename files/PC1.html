@@ -121,12 +121,22 @@
     background: #222; padding: 15px; display: none; justify-content: space-between; align-items: center;
 }
 
-/* 스마트폰 열기 버튼 */
+/* PC 페이지 <style> 태그 안의 기존 코드를 이걸로 교체 */
 #phone-open-btn {
-    position: fixed; bottom: 20px; right: 20px;
-    background: white; color: black; border-radius: 50%;
-    width: 60px; height: 60px; font-size: 1.5rem; border: none;
-    cursor: pointer; z-index: 19999; display: none; box-shadow: 0 0 15px rgba(255,255,255,0.3);
+    display: none; /* 자바스크립트가 true일 때만 block으로 바꿈 */
+    position: fixed !important;
+    bottom: 30px !important;
+    right: 30px !important;
+    width: 70px !important;
+    height: 70px !important;
+    background: #b30000 !important; /* 눈에 띄는 빨간색으로 변경 */
+    color: white !important;
+    border: 3px solid white !important;
+    border-radius: 50% !important;
+    font-size: 2rem !important;
+    z-index: 999999 !important; /* 모든 요소(노이즈 효과 포함)보다 위에 배치 */
+    cursor: pointer !important;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5) !important;
 }
         
     </style>
