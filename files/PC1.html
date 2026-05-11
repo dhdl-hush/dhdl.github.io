@@ -62,6 +62,35 @@
         .card-content { min-height: 180px; padding: 15px; line-height: 1.7; text-align: left; white-space: pre-wrap; background-image: repeating-linear-gradient(transparent, transparent 27px, #eee 27px, #eee 28px); font-size: 0.9rem; }
         .insane-card.secret-card { background: #000; color: #fff; border-color: #fff; }
         .insane-card.secret-card .card-content { background-image: repeating-linear-gradient(transparent, transparent 27px, #333 27px, #333 28px); }
+
+        /* 추가 시트 디자인 */
+.full-sheet-section { margin-top: 20px; border-top: 2px solid #b30000; padding-top: 20px; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+
+/* 특기표(Specialty) 스타일 */
+.specialty-table { 
+    display: grid; 
+    grid-template-columns: repeat(6, 1fr); 
+    gap: 2px; 
+    background: #333; 
+    border: 1px solid #333;
+    font-size: 0.7rem;
+    margin-bottom: 20px;
+}
+.spec-cat { background: #222; color: #fff; text-align: center; padding: 5px; font-weight: bold; border-bottom: 1px solid #333; }
+.spec-item { 
+    background: #000; color: #aaa; padding: 4px; text-align: center; cursor: pointer;
+    transition: 0.2s;
+}
+.spec-item:hover { background: #1a0000; }
+.spec-item.checked { background: #b30000; color: #fff; font-weight: bold; }
+
+/* 어빌리티 표 스타일 */
+.ability-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; }
+.ability-table th { background: #222; color: #888; padding: 5px; border: 1px solid #333; }
+.ability-table td { border: 1px solid #333; padding: 0; }
+.ability-table input { width: 100%; background: transparent; border: none; color: #fff; padding: 5px; box-sizing: border-box; font-size: 0.75rem; }
+        
     </style>
 </head>
 <body>
@@ -90,6 +119,29 @@
                         <span class="stat-max">/ 6</span>
                     </div>
                 </div>
+
+                <!-- 연령, 성별, 직업, 공적점 추가 -->
+<div class="info-grid">
+    <div class="info-row"><span class="info-label">연령</span><input type="text" id="char-age" class="info-input" placeholder="연령" onchange="syncFullSheet()"></div>
+    <div class="info-row"><span class="info-label">성별</span><input type="text" id="char-sex" class="info-input" placeholder="성별" onchange="syncFullSheet()"></div>
+    <div class="info-row"><span class="info-label">직업</span><input type="text" id="char-job" class="info-input" placeholder="직업" onchange="syncFullSheet()"></div>
+    <div class="info-row"><span class="info-label">공적점</span><input type="number" id="char-point" class="info-input" value="0" onchange="syncFullSheet()"></div>
+</div>
+
+<!-- 호기심, 공포심 -->
+<div class="info-grid">
+    <div class="info-row"><span class="info-label" style="color:#00ffcc">호기심</span><input type="text" id="char-curiosity" class="info-input" placeholder="지정 특기" onchange="syncFullSheet()"></div>
+    <div class="info-row"><span class="info-label" style="color:#ff4d4d">공포심</span><input type="text" id="char-fear" class="info-input" placeholder="공포 판정 요소" onchange="syncFullSheet()"></div>
+</div>
+
+<!-- 어빌리티 섹션 -->
+<h4 style="font-size:0.8rem; color:#888; margin-bottom:5px;">어빌리티 리스트</h4>
+<table class="ability-table">
+    <tr><th style="width:25%">이름</th><th style="width:15%">타입</th><th>효과</th></tr>
+    <tr><td><input type="text" id="ab-name-1" onchange="syncFullSheet()"></td><td><input type="text" id="ab-type-1" onchange="syncFullSheet()"></td><td><input type="text" id="ab-effect-1" onchange="syncFullSheet()"></td></tr>
+    <tr><td><input type="text" id="ab-name-2" onchange="syncFullSheet()"></td><td><input type="text" id="ab-type-2" onchange="syncFullSheet()"></td><td><input type="text" id="ab-effect-2" onchange="syncFullSheet()"></td></tr>
+    <tr><td><input type="text" id="ab-name-3" onchange="syncFullSheet()"></td><td><input type="text" id="ab-type-3" onchange="syncFullSheet()"></td><td><input type="text" id="ab-effect-3" onchange="syncFullSheet()"></td></tr>
+</table>
             
         <div class="info-row" style="align-items: flex-start; flex-direction: column; border-bottom: none; height: auto;">
             <span class="info-label" style="margin-bottom: 8px; width: 100%;">NOTE / 특기</span>
@@ -327,6 +379,48 @@
         window.closeHandout = () => { 
             document.getElementById('handout-modal').style.display = "none"; 
         };
+
+        // --- 8. 인세인 세부 시트 데이터 전송 ---
+window.syncFullSheet = function() {
+    const data = {
+        age: document.getElementById('char-age').value,
+        sex: document.getElementById('char-sex').value,
+        job: document.getElementById('char-job').value,
+        point: document.getElementById('char-point').value,
+        curiosity: document.getElementById('char-curiosity').value,
+        fear: document.getElementById('char-fear').value,
+        // 어빌리티 (간단하게 3개만 샘플)
+        ab1: { name: document.getElementById('ab-name-1').value, type: document.getElementById('ab-type-1').value, effect: document.getElementById('ab-effect-1').value },
+        ab2: { name: document.getElementById('ab-name-2').value, type: document.getElementById('ab-type-2').value, effect: document.getElementById('ab-effect-2').value },
+        ab3: { name: document.getElementById('ab-name-3').value, type: document.getElementById('ab-type-3').value, effect: document.getElementById('ab-effect-3').value }
+    };
+    update(ref(db, pcPath), data);
+};
+
+// --- 9. GM이 수정했을 때 내 화면에 반영 (기존 onValue 안에 추가하거나 새로 생성) ---
+onValue(ref(db, pcPath), (snapshot) => {
+    const data = snapshot.val();
+    if(data) {
+        // ... 기존 수치 반영 코드 아래에 추가 ...
+        const fields = ['age', 'sex', 'job', 'point', 'curiosity', 'fear'];
+        fields.forEach(f => {
+            const el = document.getElementById('char-' + f);
+            if(el && document.activeElement !== el) el.value = data[f] || "";
+        });
+        
+        // 어빌리티 반영
+        for(let i=1; i<=3; i++) {
+            if(data['ab'+i]) {
+                const nameEl = document.getElementById('ab-name-'+i);
+                const typeEl = document.getElementById('ab-type-'+i);
+                const effEl = document.getElementById('ab-effect-'+i);
+                if(document.activeElement !== nameEl) nameEl.value = data['ab'+i].name || "";
+                if(document.activeElement !== typeEl) typeEl.value = data['ab'+i].type || "";
+                if(document.activeElement !== effEl) effEl.value = data['ab'+i].effect || "";
+            }
+        }
+    }
+});
     </script>
 </body>
 </html>
