@@ -520,13 +520,14 @@ const PHONE_DB = {
 // ================================================================
 
 
-// --- 인터넷 앱 실행 (구글 검색 화면) ---
+// --- 스마트폰 앱 실행 (통합 및 오타 수정 버전) ---
 window.openApp = function(appName) {
     document.getElementById('phone-home').style.display = "none";
     document.getElementById('phone-app-header').style.display = "flex";
     const content = document.getElementById('phone-app-content');
     content.style.display = "block";
     content.style.background = "#fff";
+    content.style.color = "#000";
     document.getElementById('app-title').innerText = appName.toUpperCase();
 
     if(appName === 'internet') {
@@ -551,49 +552,39 @@ window.openApp = function(appName) {
             `;
         });
         content.innerHTML = resultsHtml;
-    } 
+
     } else if(appName === 'sns') {
-        content.innerHTML = `<div style="background:#1da1f2; color:white; padding:5px; font-size:0.8rem;">Twitter</div>${PHONE_DB.sns.feed}`;
+        content.innerHTML = `<div style="background:#1da1f2; color:white; padding:10px; font-size:0.9rem; font-weight:bold;">Twitter</div><div style="padding:10px;">${PHONE_DB.sns.feed}</div>`;
+
     } else if(appName === 'contacts') {
         content.innerHTML = Object.keys(PHONE_DB.calls).map(name => 
-            `<div onclick="makeCall('${name}')" style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;">👤 ${name}</div>`).join('');
+            `<div onclick="makeCall('${name}')" style="padding:15px; border-bottom:1px solid #eee; cursor:pointer; font-weight:bold;">👤 ${name}</div>`).join('');
+
     } else if(appName === 'message') {
-        content.innerHTML = PHONE_DB.messages.map(m => 
-            `<div style="background:#eee; padding:10px; border-radius:10px; margin-bottom:10px; font-size:0.8rem;">
+        let msgList = PHONE_DB.messages.map(m => 
+            `<div style="background:#e9e9eb; padding:10px; border-radius:15px; margin-bottom:10px; font-size:0.8rem; max-width:80%;">
                 <b>${m.sender}</b><br>${m.text}
-            </div>`).join('') + `<hr><p style="font-size:0.7rem; color:#888;">[답장 선택지]<br>1. 무서워<br>2. 데리러 와</p>`;
+            </div>`).join('');
+        content.innerHTML = `<div style="padding:10px;">${msgList}</div><hr><p style="font-size:0.7rem; color:#888; padding:0 10px;">[답장 선택지]<br>1. 무서워<br>2. 데리러 와</p>`;
     }
 };
 
-// --- 서브 페이지 이동 (검색 결과 클릭 시) ---
+// --- 나머지 함수들은 아래에 그대로 두시면 됩니다 ---
 window.renderSub = (type) => {
     const content = document.getElementById('phone-app-content');
-    // 뒤로가기 버튼 연출을 위해 헤더 타이틀 변경
     document.getElementById('app-title').innerHTML = `<span onclick="openApp('internet')" style="cursor:pointer;">⬅ SEARCH</span>`;
-    
-    if(type === 'wiki') {
-        content.innerHTML = PHONE_DB.internet.wiki_content;
-    } else if(type === 'ch2') {
-        content.innerHTML = PHONE_DB.internet.ch2_content;
-    } else {
-        content.innerHTML = `<div style="padding:20px; text-align:center;"><h4>404 Not Found</h4><p>페이지를 찾을 수 없습니다.</p></div>`;
-    }
+    if(type === 'wiki') content.innerHTML = PHONE_DB.internet.wiki_content;
+    else if(type === 'ch2') content.innerHTML = PHONE_DB.internet.ch2_content;
 };
 
 window.makeCall = function(name) {
     const content = document.getElementById('phone-app-content');
     content.innerHTML = `<div style="text-align:center; margin-top:50px;"><h3>${name}</h3><p>연결 중...</p></div>`;
     setTimeout(() => {
-        content.innerHTML = `
-            <div style="text-align:center; margin-top:50px;">
-                <h3>${name}</h3><hr>
-                <p style="padding:20px; font-style:italic;">"${PHONE_DB.calls[name] || "......"}"</p>
-                <button onclick="openApp('contacts')" style="margin-top:20px;">종료</button>
-            </div>`;
+        content.innerHTML = `<div style="text-align:center; margin-top:50px;"><h3>${name}</h3><hr><p style="padding:20px; font-style:italic;">"${PHONE_DB.calls[name] || "......"}"</p><button onclick="openApp('contacts')" style="margin-top:20px;">종료</button></div>`;
     }, 1500);
 };
 
-// 메인 화면으로 돌아가기 기능 유지
 window.closeApp = function() {
     document.getElementById('phone-home').style.display = "flex";
     document.getElementById('phone-app-header').style.display = "none";
