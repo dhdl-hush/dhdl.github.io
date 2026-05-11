@@ -215,6 +215,17 @@
                 // GM 페이지 card.innerHTML 내부 수정
         card.innerHTML = `
             <div class="pc-name">${pcId.toUpperCase()} : ${pc.name || '미설정'}</div>
+
+            // GM 페이지 card.innerHTML 안에서 pc-name 아래 정도에 넣으면 좋습니다.
+let detailHtml = `
+    <div style="font-size:0.7rem; color:#aaa; margin-bottom:5px; border-bottom:1px solid #222; padding-bottom:5px;">
+        ${pc.age || '?'}세 / ${pc.sex || '?'} / ${pc.job || '직업 미설정'} (공적점: ${pc.point || 0})
+    </div>
+    <div style="font-size:0.7rem; margin-bottom:10px;">
+        <span style="color:#00ffcc">호: ${pc.curiosity || '-'}</span> | 
+        <span style="color:#ff4d4d">공: ${pc.fear || '-'}</span>
+    </div>
+`;
     
             <!-- 자동 줄바꿈(pre-wrap)과 영역 제한(break-all) 추가 -->
             <div style="font-size: 0.75rem; color: #888; margin-bottom: 12px; 
