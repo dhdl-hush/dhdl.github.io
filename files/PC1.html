@@ -421,6 +421,15 @@ onValue(ref(db, pcPath), (snapshot) => {
         }
     }
 });
+
+        // GM의 전투 시작 신호를 감시해서 페이지 이동
+onValue(ref(db, 'room_01/battle/active'), (snapshot) => {
+    if (snapshot.val() === true) {
+        // 내 아이디(pc1, pc2 등)를 가져와서 전투 페이지로 이동
+        const myId = pcPath.split('/').pop(); 
+        window.location.href = `WAR.html?id=${myId}`;
+    }
+});
     </script>
 </body>
 </html>
