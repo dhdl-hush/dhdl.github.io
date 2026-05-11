@@ -284,10 +284,10 @@
 
     <!-- 파이어베이스 로직 -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, update, onValue, onChildAdded, onChildRemoved, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, update, onValue, onChildAdded, onChildRemoved, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // ⚠️ 본인의 콘솔 값으로 채우세요!
+    // ⚠️ 본인의 콘솔 값으로 채우세요!
         const firebaseConfig = {
           apiKey: "AIzaSyAUjW1D8bQ_P1o0GQpSo2zAswwA7SvT97I",
           authDomain: "dhdl-48b4a.firebaseapp.com",
@@ -298,289 +298,205 @@
           measurementId: "G-DV6XRPBJV4"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const pcPath = 'room_01/pc1'; // PC 번호에 따라 pc2, pc3 등으로 수정
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    
+    // ⚠️ 파일마다 확인! PC1.html이면 pc1, PC3.html이면 pc3로 고치세요.
+    const pcPath = 'room_01/pc1'; 
 
-        // --- 1. 주사위 기능 ---
-        const btn = document.getElementById('roll-btn');
-        const resBox = document.getElementById('dice-result');
-        if (btn) {
-            btn.addEventListener('click', () => {
-                btn.disabled = true;
-                resBox.innerText = "판정 중...";
-                let count = 0;
-                const timer = setInterval(() => {
-                    document.getElementById('die1').innerText = Math.floor(Math.random() * 6) + 1;
-                    document.getElementById('die2').innerText = Math.floor(Math.random() * 6) + 1;
-                    if(++count > 10) {
-                        clearInterval(timer);
-                        const f1 = Math.floor(Math.random() * 6) + 1;
-                        const f2 = Math.floor(Math.random() * 6) + 1;
-                        const total = f1 + f2;
-                        document.getElementById('die1').innerText = f1; 
-                        document.getElementById('die2').innerText = f2;
-                        if (total === 2) resBox.innerHTML = `<span class="fumble">펌블 (2)</span>`;
-                        else if (total === 12) resBox.innerHTML = `<span class="special">스페셜 (12)</span>`;
-                        else resBox.innerHTML = `결과: ${total}`;
-                        update(ref(db, pcPath), { lastDice: total });
-                        btn.disabled = false;
-                    }
-                }, 50);
-            });
+    // --- 1. 주사위 기능 ---
+    const btn = document.getElementById('roll-btn');
+    const resBox = document.getElementById('dice-result');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            btn.disabled = true; resBox.innerText = "판정 중...";
+            let count = 0;
+            const timer = setInterval(() => {
+                document.getElementById('die1').innerText = Math.floor(Math.random() * 6) + 1;
+                document.getElementById('die2').innerText = Math.floor(Math.random() * 6) + 1;
+                if(++count > 10) {
+                    clearInterval(timer);
+                    const f1 = Math.floor(Math.random() * 6) + 1;
+                    const f2 = Math.floor(Math.random() * 6) + 1;
+                    const total = f1 + f2;
+                    document.getElementById('die1').innerText = f1; document.getElementById('die2').innerText = f2;
+                    if (total === 2) resBox.innerHTML = `<span class="fumble">펌블 (2)</span>`;
+                    else if (total === 12) resBox.innerHTML = `<span class="special">스페셜 (12)</span>`;
+                    else resBox.innerHTML = `결과: ${total}`;
+                    update(ref(db, pcPath), { lastDice: total });
+                    btn.disabled = false;
+                }
+            }, 50);
+        });
+    }
+
+    // --- 2. 데이터 실시간 동기화 (모든 수치 반영) ---
+    onValue(ref(db, pcPath), (snapshot) => {
+        const data = snapshot.val();
+        if(!data) return;
+
+        // [A] 기본 수치 반영
+        if(data.hp !== undefined) document.getElementById('hp-val').innerText = data.hp;
+        if(data.san !== undefined) document.getElementById('san-val').innerText = data.san;
+        
+        // [B] 입력 필드들 반영 (내가 입력 중일 때는 건너뜀)
+        const inputs = {
+            'char-name': data.name,
+            'char-age': data.age,
+            'char-sex': data.sex,
+            'char-job': data.job,
+            'char-point': data.point,
+            'char-curiosity': data.curiosity,
+            'char-fear': data.fear,
+            'char-note': data.note
+        };
+        for(let id in inputs) {
+            const el = document.getElementById(id);
+            if(el && data[id.replace('char-','')] !== undefined && document.activeElement !== el) {
+                el.value = data[id.replace('char-','')] || "";
+            }
         }
 
-        // --- 2. 실시간 수치 동기화 (GM -> PC) ---
-        onValue(ref(db, pcPath), (snapshot) => {
-            const data = snapshot.val();
-            if(data) {
-                if(data.hp !== undefined) document.getElementById('hp-val').innerText = data.hp;
-                if(data.san !== undefined) document.getElementById('san-val').innerText = data.san;
-                if(data.name && document.activeElement !== document.getElementById('char-name')) {
-                    document.getElementById('char-name').value = data.name;
-                }
-                if(data.note && document.activeElement !== document.getElementById('char-note')) {
-                    document.getElementById('char-note').value = data.note;
-                }
-            }
-        });
-
-        // --- 3. 내 프로필 전송 (PC -> GM) ---
-        window.syncProfile = () => {
-            const name = document.getElementById('char-name').value;
-            const note = document.getElementById('char-note').value;
-            update(ref(db, pcPath), { name: name, note: note });
-        };
-
-        // --- 4. 핸드아웃(inventory) 수신 ---
-        const invRef = ref(db, pcPath + '/inventory');
-        let isInitialLoad = true;
-        onValue(invRef, () => { isInitialLoad = false; }, { onlyOnce: true });
-
-        onChildAdded(invRef, (snapshot) => {
-            const item = snapshot.val();
-            const itemId = snapshot.key;
-            const list = document.getElementById('inventory-list');
-            if(list.querySelector('p')) list.innerHTML = "";
-
-            const shockInfo = `${item.trigger || '전원'} / ${item.shock || '없음'}`;
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'item-slot';
-            itemDiv.id = "item-" + itemId;
-            itemDiv.innerHTML = `<span>${item.title}</span>`;
-            itemDiv.onclick = () => window.showHandout(item.title, item.content, item.secret, shockInfo);
-            list.appendChild(itemDiv);
-
-            if (!isInitialLoad) window.showHandout(item.title, item.content, item.secret, shockInfo);
-        });
-
-        onChildRemoved(invRef, (snapshot) => {
-            const itemDiv = document.getElementById("item-" + snapshot.key);
-            if(itemDiv) itemDiv.remove();
-        });
-
-        // --- 5. 소모품 아이템(items) 수신 ---
-        const itemRef = ref(db, pcPath + '/items');
-        onChildAdded(itemRef, (snapshot) => {
-            const item = snapshot.val();
-            const itemId = snapshot.key;
-            const list = document.getElementById('pc-item-list');
-            if(list && list.querySelector('p')) list.innerHTML = "";
-
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'item-slot';
-            itemDiv.id = "real-item-" + itemId;
-            itemDiv.style.borderColor = "#00ffcc";
-            itemDiv.innerHTML = `
-                <div style="font-weight:bold; color:#00ffcc; margin-bottom:5px;">${item.title}</div>
-                <button class="use-btn" onclick="window.useItem('${itemId}', '${item.effect.type}', ${item.effect.val}, '${item.title}')" 
-                        style="width:100%; background:#00ffcc; color:#000; font-weight:bold; border:none; padding:5px; cursor:pointer;">사용</button>
-            `;
-            if(list) list.appendChild(itemDiv);
-        });
-
-        onChildRemoved(itemRef, (snapshot) => {
-            const itemDiv = document.getElementById("real-item-" + snapshot.key);
-            if(itemDiv) itemDiv.remove();
-        });
-
-        // --- 6. 아이템 사용 함수 ---
-        window.useItem = function(itemId, type, val, title) {
-            if(!confirm(`[${title}]을(를) 사용하시겠습니까?`)) return;
-
-            const hpEl = document.getElementById('hp-val');
-            const sanEl = document.getElementById('san-val');
-            
-            if (type === 'painkiller') {
-                if(confirm("생명력을 회복하시겠습니까? (취소 시 이성치 회복)")) {
-                    update(ref(db, pcPath), { hp: Math.min(6, parseInt(hpEl.innerText) + 1) });
-                } else {
-                    update(ref(db, pcPath), { san: Math.min(6, parseInt(sanEl.innerText) + 1) });
-                }
-            } else if (type === 'weapon') {
-                document.getElementById('roll-btn').disabled = false;
-                alert("무기를 사용하여 다시 굴릴 수 있습니다!");
-            } else if (type === 'talisman') {
-                update(ref(db, pcPath), { lastDice: "부적 사용!" });
-                alert("부적을 사용했습니다. 재굴림 대상을 GM에게 말하세요.");
-            }
-
-            // 두 경로 모두에서 삭제 시도 (확실하게 제거)
-            remove(ref(db, pcPath + '/inventory/' + itemId));
-            remove(ref(db, pcPath + '/items/' + itemId));
-        };
-
-        // --- 7. 모달/팝업 제어 ---
-        window.showHandout = (title, content, secret, shock) => {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-content').innerText = content;
-            document.getElementById('modal-secret-text').innerText = secret;
-            document.getElementById('modal-shock').innerText = shock;
-            document.getElementById('card-front').style.display = "block";
-            document.getElementById('card-back').style.display = "none";
-            document.getElementById('handout-modal').style.display = "block";
-        };
-
-        window.revealSecretInModal = () => {
-            if(confirm("비밀을 확인하시겠습니까?")) {
-                document.getElementById('card-front').style.display = "none";
-                document.getElementById('card-back').style.display = "block";
-            }
-        };
-
-        window.closeHandout = () => { 
-            document.getElementById('handout-modal').style.display = "none"; 
-        };
-
-        // --- 8. 인세인 세부 시트 데이터 전송 ---
-window.syncFullSheet = function() {
-    const data = {
-        age: document.getElementById('char-age').value,
-        sex: document.getElementById('char-sex').value,
-        job: document.getElementById('char-job').value,
-        point: document.getElementById('char-point').value,
-        curiosity: document.getElementById('char-curiosity').value,
-        fear: document.getElementById('char-fear').value,
-        // 어빌리티 (간단하게 3개만 샘플)
-        ab1: { name: document.getElementById('ab-name-1').value, type: document.getElementById('ab-type-1').value, effect: document.getElementById('ab-effect-1').value },
-        ab2: { name: document.getElementById('ab-name-2').value, type: document.getElementById('ab-type-2').value, effect: document.getElementById('ab-effect-2').value },
-        ab3: { name: document.getElementById('ab-name-3').value, type: document.getElementById('ab-type-3').value, effect: document.getElementById('ab-effect-3').value }
-    };
-    update(ref(db, pcPath), data);
-};
-
-// --- 9. GM이 수정했을 때 내 화면에 반영 (기존 onValue 안에 추가하거나 새로 생성) ---
-onValue(ref(db, pcPath), (snapshot) => {
-    const data = snapshot.val();
-    if(data) {
-        // ... 기존 수치 반영 코드 아래에 추가 ...
-        const fields = ['age', 'sex', 'job', 'point', 'curiosity', 'fear'];
-        fields.forEach(f => {
-            const el = document.getElementById('char-' + f);
-            if(el && document.activeElement !== el) el.value = data[f] || "";
-        });
-        
-        // 어빌리티 반영
+        // [C] 어빌리티 반영
         for(let i=1; i<=3; i++) {
-            if(data['ab'+i]) {
-                const nameEl = document.getElementById('ab-name-'+i);
-                const typeEl = document.getElementById('ab-type-'+i);
-                const effEl = document.getElementById('ab-effect-'+i);
-                if(document.activeElement !== nameEl) nameEl.value = data['ab'+i].name || "";
-                if(document.activeElement !== typeEl) typeEl.value = data['ab'+i].type || "";
-                if(document.activeElement !== effEl) effEl.value = data['ab'+i].effect || "";
+            const ab = data['ab'+i];
+            if(ab) {
+                if(document.activeElement !== document.getElementById('ab-name-'+i)) document.getElementById('ab-name-'+i).value = ab.name || "";
+                if(document.activeElement !== document.getElementById('ab-type-'+i)) document.getElementById('ab-type-'+i).value = ab.type || "";
+                if(document.activeElement !== document.getElementById('ab-effect-'+i)) document.getElementById('ab-effect-'+i).value = ab.effect || "";
             }
         }
-    }
-});
 
-        // GM의 전투 시작 신호를 감시해서 페이지 이동
-onValue(ref(db, 'room_01/battle/active'), (snapshot) => {
-    if (snapshot.val() === true) {
-        // 내 아이디(pc1, pc2 등)를 가져와서 전투 페이지로 이동
-        const myId = pcPath.split('/').pop(); 
-        window.location.href = `WAR.html?id=${myId}`;
-    }
-});
+        // [D] 📱 스마트폰 소유권 체크 (여기가 핵심!)
+        const phoneBtn = document.getElementById('phone-open-btn');
+        const phoneOverlay = document.getElementById('smartphone-overlay');
+        if (data.hasPhone === true) {
+            phoneBtn.style.display = "block"; // GM이 주면 나타남
+        } else {
+            phoneBtn.style.display = "none";
+            phoneOverlay.style.display = "none"; // 뺏으면 닫힘
+        }
+    });
 
-        // --- 10. 메인 보드(공개 핸드아웃) 감시 ---
-        const publicRef = ref(db, 'room_01/public_handouts');
-        
-        onValue(publicRef, (snapshot) => {
-            const list = document.getElementById('public-handout-list');
-            const data = snapshot.val();
-            
-            list.innerHTML = ""; // 초기화
-            
-            if(!data) {
-                list.innerHTML = '<span style="color: #444; font-size: 0.8rem;">현재 공개된 정보가 없습니다.</span>';
-                return;
-            }
-
-            for(let id in data) {
-                const ho = data[id];
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'item-slot';
-                itemDiv.style.borderColor = "#0066ff";
-                itemDiv.style.minWidth = "120px";
-                itemDiv.innerText = ho.title;
-                
-                // 클릭 시 팝업 열기 (비밀과 쇼크는 없음으로 전달)
-                itemDiv.onclick = () => window.showHandout(ho.title, ho.content, "공개된 정보에는 비밀이 없습니다.", "없음");
-                
-                list.appendChild(itemDiv);
-            }
-        });
-
-        // --- 스마트폰 시스템 로직 ---
-        let isPhoneOpen = false;
-
-        // 1. 소유권 실시간 감시
-        onValue(ref(db, pcPath), (snapshot) => {
-            const data = snapshot.val();
-            const btn = document.getElementById('phone-open-btn');
-            const phone = document.getElementById('smartphone-overlay');
-            
-            if (data && data.hasPhone) {
-                btn.style.display = "block"; // 버튼 보이기
-            } else {
-                btn.style.display = "none";
-                phone.style.display = "none"; // 소유권 뺏기면 화면 닫기
-            }
-        });
-
-        window.togglePhoneUI = function() {
-            const phone = document.getElementById('smartphone-overlay');
-            isPhoneOpen = !isPhoneOpen;
-            phone.style.display = isPhoneOpen ? "flex" : "none";
-            if(!isPhoneOpen) closeApp();
+    // --- 3. 데이터 전송 함수들 ---
+    window.syncProfile = window.syncFullSheet = function() {
+        const data = {
+            name: document.getElementById('char-name').value,
+            age: document.getElementById('char-age').value,
+            sex: document.getElementById('char-sex').value,
+            job: document.getElementById('char-job').value,
+            point: document.getElementById('char-point').value,
+            curiosity: document.getElementById('char-curiosity').value,
+            fear: document.getElementById('char-fear').value,
+            note: document.getElementById('char-note').value,
+            ab1: { name: document.getElementById('ab-name-1').value, type: document.getElementById('ab-type-1').value, effect: document.getElementById('ab-effect-1').value },
+            ab2: { name: document.getElementById('ab-name-2').value, type: document.getElementById('ab-type-2').value, effect: document.getElementById('ab-effect-2').value },
+            ab3: { name: document.getElementById('ab-name-3').value, type: document.getElementById('ab-type-3').value, effect: document.getElementById('ab-effect-3').value }
         };
+        update(ref(db, pcPath), data);
+    };
 
-        window.openApp = function(appName, icon) {
-            document.getElementById('phone-home').style.display = "none";
-            document.getElementById('phone-app-header').style.display = "flex";
-            document.getElementById('phone-app-content').style.display = "block";
-            document.getElementById('app-title').innerText = appName.toUpperCase();
-            
-            const content = document.getElementById('phone-app-content');
-            
-            // 앱별 초기 내용 (상세 내용은 나중에 구현)
-            if(appName === 'internet') {
-                content.innerHTML = "<h4>Search</h4><input type='text' style='width:100%' placeholder='검색어 입력...'><p style='font-size:0.8rem; color:#666; margin-top:20px;'>인터넷에 연결할 수 없습니다.</p>";
-            } else if(appName === 'sns') {
-                content.innerHTML = "<div style='border-bottom:1px solid #ddd; padding:10px;'><b>@unknown</b><br>여긴 어디지...?</div>";
-            } else if(appName === 'contacts') {
-                content.innerHTML = "<li>엄마</li><li>112</li><li>119</li>";
-            } else if(appName === 'message') {
-                content.innerHTML = "<p>수신된 메시지가 없습니다.</p>";
-            }
-        };
+    // --- 4. 핸드아웃 & 아이템 관리 ---
+    const invRef = ref(db, pcPath + '/inventory');
+    const itemRef = ref(db, pcPath + '/items');
+    let isInitialLoad = true;
+    onValue(invRef, () => { isInitialLoad = false; }, { onlyOnce: true });
 
-        window.closeApp = function() {
-            document.getElementById('phone-home').style.display = "flex";
-            document.getElementById('phone-app-header').style.display = "none";
-            document.getElementById('phone-app-content').style.display = "none";
-        };
-    </script>
+    // 핸드아웃 수신
+    onChildAdded(invRef, (snapshot) => {
+        const item = snapshot.val();
+        const list = document.getElementById('inventory-list');
+        if(list.querySelector('p')) list.innerHTML = "";
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item-slot'; itemDiv.id = "item-" + snapshot.key;
+        itemDiv.innerText = item.title;
+        itemDiv.onclick = () => window.showHandout(item.title, item.content, item.secret, `${item.trigger || '전원'} / ${item.shock || '없음'}`);
+        list.appendChild(itemDiv);
+        if (!isInitialLoad) window.showHandout(item.title, item.content, item.secret, `${item.trigger || '전원'} / ${item.shock || '없음'}`);
+    });
+    onChildRemoved(invRef, (snapshot) => { document.getElementById("item-" + snapshot.key)?.remove(); });
+
+    // 소모품 아이템 수신
+    onChildAdded(itemRef, (snapshot) => {
+        const item = snapshot.val();
+        const list = document.getElementById('pc-item-list');
+        if(list.querySelector('p')) list.innerHTML = "";
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item-slot'; itemDiv.id = "real-item-" + snapshot.key;
+        itemDiv.style.borderColor = "#00ffcc";
+        itemDiv.innerHTML = `<div style="color:#00ffcc; font-weight:bold;">${item.title}</div><button class="use-btn" onclick="window.useItem('${snapshot.key}', '${item.effect.type}', ${item.effect.val}, '${item.title}')" style="width:100%; background:#00ffcc; border:none; cursor:pointer;">사용</button>`;
+        list.appendChild(itemDiv);
+    });
+    onChildRemoved(itemRef, (snapshot) => { document.getElementById("real-item-" + snapshot.key)?.remove(); });
+
+    // 아이템 사용
+    window.useItem = function(itemId, type, val, title) {
+        if(!confirm(`[${title}] 아이템을 사용하시겠습니까?`)) return;
+        const hp = parseInt(document.getElementById('hp-val').innerText);
+        const san = parseInt(document.getElementById('san-val').innerText);
+        if (type === 'painkiller') {
+            if(confirm("생명력을 회복(확인) / 이성치를 회복(취소)")) update(ref(db, pcPath), { hp: Math.min(6, hp + 1) });
+            else update(ref(db, pcPath), { san: Math.min(6, san + 1) });
+        } else if (type === 'weapon') { document.getElementById('roll-btn').disabled = false; alert("재굴림 가능!"); }
+        else if (type === 'talisman') { update(ref(db, pcPath), { lastDice: "부적 사용!" }); }
+        remove(ref(db, pcPath + '/items/' + itemId));
+        remove(ref(db, pcPath + '/inventory/' + itemId));
+    };
+
+    // --- 5. 스마트폰 & 메인보드 제어 ---
+    let isPhoneOpen = false;
+    window.togglePhoneUI = () => {
+        const p = document.getElementById('smartphone-overlay');
+        isPhoneOpen = !isPhoneOpen; p.style.display = isPhoneOpen ? "flex" : "none";
+        if(!isPhoneOpen) window.closeApp();
+    };
+    window.openApp = (appName) => {
+        document.getElementById('phone-home').style.display = "none";
+        document.getElementById('phone-app-header').style.display = "flex";
+        document.getElementById('phone-app-content').style.display = "block";
+        document.getElementById('app-title').innerText = appName.toUpperCase();
+        const c = document.getElementById('phone-app-content');
+        if(appName === 'internet') c.innerHTML = "<p>연결 오류</p>";
+        else if(appName === 'sns') c.innerHTML = "<p>알림 없음</p>";
+        else if(appName === 'contacts') c.innerHTML = "<li>엄마</li><li>112</li>";
+        else if(appName === 'message') c.innerHTML = "<p>문자 없음</p>";
+    };
+    window.closeApp = () => {
+        document.getElementById('phone-home').style.display = "flex";
+        document.getElementById('phone-app-header').style.display = "none";
+        document.getElementById('phone-app-content').style.display = "none";
+    };
+
+    // 메인보드 감시
+    onValue(ref(db, 'room_01/public_handouts'), (snapshot) => {
+        const list = document.getElementById('public-handout-list');
+        const data = snapshot.val();
+        list.innerHTML = data ? "" : '<span style="color: #444; font-size: 0.8rem;">현재 공개된 정보가 없습니다.</span>';
+        for(let id in data) {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'item-slot'; itemDiv.style.borderColor = "#0066ff"; itemDiv.innerText = data[id].title;
+            itemDiv.onclick = () => window.showHandout(data[id].title, data[id].content, "비밀 없음", "없음");
+            list.appendChild(itemDiv);
+        }
+    });
+
+    // 전투 이동 감시
+    onValue(ref(db, 'room_01/battle/active'), (snap) => {
+        if (snap.val() === true) window.location.href = `WAR.html?id=${pcPath.split('/').pop()}`;
+    });
+
+    // 팝업 공통
+    window.showHandout = (t, c, s, sh) => {
+        document.getElementById('modal-title').innerText = t;
+        document.getElementById('modal-content').innerText = c;
+        document.getElementById('modal-secret-text').innerText = s;
+        document.getElementById('modal-shock').innerText = sh;
+        document.getElementById('card-front').style.display = "block";
+        document.getElementById('card-back').style.display = "none";
+        document.getElementById('handout-modal').style.display = "block";
+    };
+    window.revealSecretInModal = () => { if(confirm("비밀을 보시겠습니까?")) { document.getElementById('card-front').style.display = "none"; document.getElementById('card-back').style.display = "block"; } };
+    window.closeHandout = () => { document.getElementById('handout-modal').style.display = "none"; };
+</script>
 </body>
 </html>
