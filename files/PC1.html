@@ -464,22 +464,34 @@
 // 📱 스마트폰 컨텐츠 설정 (여기서 내용을 마음대로 수정하세요!)
 // ================================================================
 const PHONE_DB = {
-    // [1] 인터넷 앱 내용
     internet: {
-        google_results: [
-            { title: "키사라기역 - 위키백과", desc: "존재하지 않는 역에 대한 도시전설..." },
-            { title: "2ch 실황 스레드", desc: "지금 이상한 역에 내렸는데.. (진행중)" }
+        // 구글 검색 결과에 뜰 리스트
+        search_results: [
+            { id: 'wiki', title: "키사라기역 - 위키백과", url: "ko.wikipedia.org > wiki > 키사라기역", desc: "키사라기역(如月駅)은 일본의 인터넷 커뮤니티 2채널을 중심으로 퍼진 도시전설 속의 유령역입니다..." },
+            { id: 'ch2', title: "[실황] 지금 이상한 역에 내렸는데... (2ch)", url: "bbs.2ch.net > occ > 12345678", desc: "ID:Hasumi. 전차가 멈추지 않아. 벌써 20분째 달리고 있어. 방금 '키사라기역'이라는 곳에 내렸는데..." },
+            { id: 'news', title: "시즈오카현 노선에서 실종자 속출, 경찰 조사 중", url: "shizuoka-news.jp > local", desc: "시즈오카현 내 특정 철도 노선 이용객들이 행방불명되는 사건이 잇따라 발생하고 있어 당국이..." }
         ],
-        wiki_content: `/* ━━━━ 수정할 부분 ━━━━ */
-            <h4>키사라기역(如月駅)</h4>
-            <p>일본의 철도 노선에 존재하지 않는 유령역. 
-            2004년 2ch 스레드에 올라온 실황 글이 시초가 되었다. 
-            그곳에 내린 사람은 다시는 돌아올 수 없다고 전해진다.</p>
+        // 위키 상세 내용
+        wiki_content: `
+            <div style="padding:10px; font-family:serif;">
+                <h2 style="border-bottom:1px solid #aaa;">키사라기역</h2>
+                <p style="font-size:0.85rem; line-height:1.6;">일본의 철도 노선에 존재하지 않는 유령역. 2004년 2ch 스레드에 올라온 실황 글이 시초가 되었다.</p>
+                <p style="font-size:0.85rem; line-height:1.6;"><b>개요:</b> 하스미(葉純)라는 닉네임의 여성이 신하마마츠역에서 승차한 뒤, 존재하지 않는 무인역에 내려 겪은 일들을 실시간으로 올리며 유명해졌다.</p>
+            </div>
         `,
-        ch2_content: `/* ━━━━ 수정할 부분 ━━━━ */
-            <h4>2ch 실황 스레드</h4>
-            <p><b>[14:12] ID:Hasumi</b> : 전차가 멈추지 않아. 벌써 20분째 달리고 있어.</p>
-            <p><b>[14:20] ID:Hasumi</b> : '키사라기역' 이라는 곳에 내렸어. 여긴 어디지?</p>
+        // 2ch 상세 내용
+        ch2_content: `
+            <div style="background:#efefef; padding:10px; min-height:100%;">
+                <h4 style="color:red; border-bottom:1px solid #ccc;">【실황】 지금 이상한 역에 내렸는데..</h4>
+                <div style="font-size:0.75rem; margin-bottom:10px; border-bottom:1px dashed #aaa; padding-bottom:5px;">
+                    <b>1: ID:Hasumi (2004/01/08 23:12)</b><br>
+                    기분 탓일지도 모르겠지만, 아까부터 전차가 멈추질 않아. 
+                </div>
+                <div style="font-size:0.75rem; margin-bottom:10px; border-bottom:1px dashed #aaa; padding-bottom:5px;">
+                    <b>15: ID:Hasumi (2004/01/09 00:05)</b><br>
+                    '키사라기역' 이라는 곳에 내렸어. 무인역이야.
+                </div>
+            </div>
         `
     },
     // [2] SNS(트위터) 앱 내용
@@ -503,30 +515,43 @@ const PHONE_DB = {
         { sender: "모르는 번호", text: "뒤를 봐." }
     ]
 };
+
+        
 // ================================================================
 
 
-// --- 스마트폰 제어 기능 (아래는 로직이므로 건드리지 않아도 됩니다) ---
+// --- 인터넷 앱 실행 (구글 검색 화면) ---
 window.openApp = function(appName) {
     document.getElementById('phone-home').style.display = "none";
     document.getElementById('phone-app-header').style.display = "flex";
-    document.getElementById('phone-app-content').style.display = "block";
-    document.getElementById('app-title').innerText = appName.toUpperCase();
-    
     const content = document.getElementById('phone-app-content');
-    content.style.background = "#fff"; content.style.color = "#000";
+    content.style.display = "block";
+    content.style.background = "#fff";
+    document.getElementById('app-title').innerText = appName.toUpperCase();
 
     if(appName === 'internet') {
-        content.innerHTML = `
-            <div style="font-size:0.7rem; border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px;">
-                <span onclick="openApp('internet')" style="color:blue; cursor:pointer;">[검색]</span> 
-                <span onclick="renderSub('wiki')" style="color:blue; cursor:pointer;">[위키]</span> 
-                <span onclick="renderSub('ch2')" style="color:blue; cursor:pointer;">[2ch]</span>
+        // 구글 검색창 및 결과 리스트 디자인
+        let resultsHtml = `
+            <div style="text-align:center; padding:10px 0;">
+                <span style="font-size:1.5rem; font-weight:bold;"><span style="color:#4285F4;">G</span><span style="color:#EA4335;">o</span><span style="color:#FBBC05;">o</span><span style="color:#4285F4;">g</span><span style="color:#34A853;">l</span><span style="color:#EA4335;">e</span></span>
+                <div style="margin:10px auto; width:90%; border:1px solid #ddd; border-radius:20px; padding:8px 15px; text-align:left; font-size:0.8rem; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                    키사라기역
+                </div>
             </div>
-            <div id="sub-content">
-                <b>Google: 키사라기역</b><br>
-                ${PHONE_DB.internet.google_results.map(r => `<li style="font-size:0.8rem; margin-top:10px;"><b>${r.title}</b><br>${r.desc}</li>`).join('')}
-            </div>`;
+            <div style="background:#f1f1f1; height:5px; margin:10px 0;"></div>
+        `;
+
+        PHONE_DB.internet.search_results.forEach(res => {
+            resultsHtml += `
+                <div style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;" onclick="renderSub('${res.id}')">
+                    <div style="font-size:0.65rem; color:#202124; margin-bottom:3px;">${res.url}</div>
+                    <div style="font-size:1rem; color:#1a0dab; margin-bottom:5px;">${res.title}</div>
+                    <div style="font-size:0.75rem; color:#4d5156; line-height:1.4;">${res.desc}</div>
+                </div>
+            `;
+        });
+        content.innerHTML = resultsHtml;
+    } 
     } else if(appName === 'sns') {
         content.innerHTML = `<div style="background:#1da1f2; color:white; padding:5px; font-size:0.8rem;">Twitter</div>${PHONE_DB.sns.feed}`;
     } else if(appName === 'contacts') {
@@ -540,8 +565,19 @@ window.openApp = function(appName) {
     }
 };
 
+// --- 서브 페이지 이동 (검색 결과 클릭 시) ---
 window.renderSub = (type) => {
-    document.getElementById('sub-content').innerHTML = type === 'wiki' ? PHONE_DB.internet.wiki_content : PHONE_DB.internet.ch2_content;
+    const content = document.getElementById('phone-app-content');
+    // 뒤로가기 버튼 연출을 위해 헤더 타이틀 변경
+    document.getElementById('app-title').innerHTML = `<span onclick="openApp('internet')" style="cursor:pointer;">⬅ SEARCH</span>`;
+    
+    if(type === 'wiki') {
+        content.innerHTML = PHONE_DB.internet.wiki_content;
+    } else if(type === 'ch2') {
+        content.innerHTML = PHONE_DB.internet.ch2_content;
+    } else {
+        content.innerHTML = `<div style="padding:20px; text-align:center;"><h4>404 Not Found</h4><p>페이지를 찾을 수 없습니다.</p></div>`;
+    }
 };
 
 window.makeCall = function(name) {
