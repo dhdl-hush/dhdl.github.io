@@ -495,26 +495,43 @@ const PHONE_DB = {
         `
     },
     // [2] SNS(트위터) 앱 내용
-    sns: {
-        feed: `/* ━━━━ 수정할 부분 ━━━━ */
-            <div style="border-bottom:1px solid #ddd; padding:10px;">
-                <b>@News_Bot</b> [속보] 시즈오카현 실종자 속출... <br><br>
-                <b>@Kisaragi_Ghost</b> 누가 좀 도와줘.. 여긴 전파가 안 터져..
-            </div>
-        `
-    },
-    // [3] 전화기 너머 목소리 설정
+    sns: [
+        { user: "뉴스봇", handle: "@news_daily", text: "[속보] 시즈오카현 내 원인 불명의 실종 사건 발생. 경찰 당국 주시 중.", time: "2시간 전" },
+        { user: "익명", handle: "@user_778", text: "방금 키사라기역이라는 곳에 내렸는데... 전파가 잘 안 터지네. 근데 여기 벽보에 왠 글자가 써있어. '/* ━━━━ PC2이름 한글자 ━━━━ */' 라고... 누구 이름인가?", time: "45분 전" },
+        { user: "괴담러", handle: "@horror_fan", text: "키사라기역 괴담 정리: 1. 북소리가 들린다. 2. 한 다리 노인을 만난다. 3. 터널을 지나면...", time: "10분 전" }
+    ],
     calls: {
-        "경찰": "치-익... 여보세요? 아, 또 장난전화인가... (끊김)",
-        "택시": "그곳까지는 갈 수 없습니다. 길이... 끊겨있거든요.",
-        "부모님": "어디니? 지금 밥 차려놨는데... 왜 목소리가 안 들리니?"
+        "경찰": "......여보세요? 아, 또 지지직거리는군. 이봐! 장난전화는 처벌 대상이야! (치익-)",
+        "택시": "키사라기역...이요? 거긴 저희 영업 구역이 아닙니다. 아니, 애초에 그런 역은 없어요.",
+        "부모님": "어머, 왜 전화를 안 받니? 지금 어디야? 아빠랑 같이 기다리고 있어. 빨리 돌아오렴."
     },
-    // [4] 문자 메시지 목록 (선택지 포함)
     messages: [
-        { sender: "친구", text: "야 너 어디야? 수업 시작했다." },
-        { sender: "모르는 번호", text: "뒤를 봐." }
+        { 
+            sender: "엄마", 
+            lastText: "어디니? 밥 먹어야지.", 
+            chatHistory: [
+                { type: "in", text: "어디니? 밥 먹어야지." }
+            ],
+            choices: [
+                { text: "지금 전차 안이야.", reply: "그래, 조심해서 오렴. 근데 전차가 왜 이렇게 오래 걸리니?" },
+                { text: "이상한 역에 내렸어.", reply: "장난치지 말고. 빨리 집으로 와. 무서운 세상이다." }
+            ]
+        },
+        { 
+            sender: "친구", 
+            lastText: "야 너 아까 누구랑 같이 있었냐?", 
+            chatHistory: [
+                { type: "in", text: "야 너 아까 누구랑 같이 있었냐? 혼자 아니었어?" }
+            ],
+            choices: [
+                { text: "무슨 소리야? 나 혼자였어.", reply: "그래? 분명 네 뒤에 누가 서있는 거 같았는데..." },
+                { text: "말하기 복잡해.", reply: "하여간 수상해. 나중에 술이나 사." }
+            ]
+        }
     ]
 };
+
+let currentChatIndex = null;
 
         
 // ================================================================
@@ -527,56 +544,160 @@ window.openApp = function(appName) {
     const content = document.getElementById('phone-app-content');
     content.style.display = "block";
     content.style.background = "#fff";
-    content.style.color = "#000";
     document.getElementById('app-title').innerText = appName.toUpperCase();
 
     if(appName === 'internet') {
-        // 구글 검색창 및 결과 리스트 디자인
-        let resultsHtml = `
-            <div style="text-align:center; padding:10px 0;">
-                <span style="font-size:1.5rem; font-weight:bold;"><span style="color:#4285F4;">G</span><span style="color:#EA4335;">o</span><span style="color:#FBBC05;">o</span><span style="color:#4285F4;">g</span><span style="color:#34A853;">l</span><span style="color:#EA4335;">e</span></span>
-                <div style="margin:10px auto; width:90%; border:1px solid #ddd; border-radius:20px; padding:8px 15px; text-align:left; font-size:0.8rem; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-                    키사라기역
-                </div>
-            </div>
-            <div style="background:#f1f1f1; height:5px; margin:10px 0;"></div>
-        `;
-
-        PHONE_DB.internet.search_results.forEach(res => {
-            resultsHtml += `
-                <div style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;" onclick="renderSub('${res.id}')">
-                    <div style="font-size:0.65rem; color:#202124; margin-bottom:3px;">${res.url}</div>
-                    <div style="font-size:1rem; color:#1a0dab; margin-bottom:5px;">${res.title}</div>
-                    <div style="font-size:0.75rem; color:#4d5156; line-height:1.4;">${res.desc}</div>
-                </div>
-            `;
-        });
-        content.innerHTML = resultsHtml;
-
+        renderGoogleSearch();
     } else if(appName === 'sns') {
-        content.innerHTML = `<div style="background:#1da1f2; color:white; padding:10px; font-size:0.9rem; font-weight:bold;">Twitter</div><div style="padding:10px;">${PHONE_DB.sns.feed}</div>`;
-
+        renderTwitter();
     } else if(appName === 'contacts') {
-        content.innerHTML = Object.keys(PHONE_DB.calls).map(name => 
-            `<div onclick="makeCall('${name}')" style="padding:15px; border-bottom:1px solid #eee; cursor:pointer; font-weight:bold;">👤 ${name}</div>`).join('');
-
+        renderContacts();
     } else if(appName === 'message') {
-        let msgList = PHONE_DB.messages.map(m => 
-            `<div style="background:#e9e9eb; padding:10px; border-radius:15px; margin-bottom:10px; font-size:0.8rem; max-width:80%;">
-                <b>${m.sender}</b><br>${m.text}
-            </div>`).join('');
-        content.innerHTML = `<div style="padding:10px;">${msgList}</div><hr><p style="font-size:0.7rem; color:#888; padding:0 10px;">[답장 선택지]<br>1. 무서워<br>2. 데리러 와</p>`;
+        renderMessageList();
     }
 };
 
-// --- 나머지 함수들은 아래에 그대로 두시면 됩니다 ---
-window.renderSub = (type) => {
+// [1] 인터넷: 구글 디자인
+function renderGoogleSearch() {
+    const content = document.getElementById('phone-app-content');
+    content.innerHTML = `
+        <div style="text-align:center; padding:10px 0;">
+            <span style="font-size:1.5rem; font-weight:bold;"><span style="color:#4285F4;">G</span><span style="color:#EA4335;">o</span><span style="color:#FBBC05;">o</span><span style="color:#4285F4;">g</span><span style="color:#34A853;">l</span><span style="color:#EA4335;">e</span></span>
+            <div style="margin:10px auto; width:90%; border:1px solid #ddd; border-radius:20px; padding:8px 15px; text-align:left; font-size:0.8rem; box-shadow:0 1px 3px rgba(0,0,0,0.1);">키사라기역</div>
+        </div>
+        <div style="background:#f1f1f1; height:5px; margin:10px 0;"></div>
+        <div style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;" onclick="renderSub('wiki')">
+            <div style="font-size:0.6rem; color:#202124;">ko.wikipedia.org > wiki</div>
+            <div style="font-size:1rem; color:#1a0dab;">키사라기역 - 위키백과</div>
+            <div style="font-size:0.75rem; color:#4d5156;">존재하지 않는 유령역에 대한 도시전설...</div>
+        </div>
+        <div style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;" onclick="renderSub('ch2')">
+            <div style="font-size:0.6rem; color:#202124;">bbs.2ch.net > occ</div>
+            <div style="font-size:1rem; color:#1a0dab;">[실황] 지금 이상한 역에 내렸는데...</div>
+            <div style="font-size:0.75rem; color:#4d5156;">ID:Hasumi. 전차가 멈추지 않아...</div>
+        </div>
+    `;
+}
+
+// [2] SNS: 트위터 디자인
+function renderTwitter() {
+    const content = document.getElementById('phone-app-content');
+    let html = `<div style="border-bottom:1px solid #eee; padding:10px; font-weight:bold; font-size:1.1rem;">실시간 트렌드</div>`;
+    PHONE_DB.sns.forEach(tweet => {
+        html += `
+            <div style="display:flex; padding:12px; border-bottom:1px solid #eee;">
+                <div style="width:40px; height:40px; background:#ddd; border-radius:50%; margin-right:10px;"></div>
+                <div style="flex:1;">
+                    <div style="font-size:0.85rem;"><b>${tweet.user}</b> <span style="color:#666;">${tweet.handle} · ${tweet.time}</span></div>
+                    <div style="font-size:0.9rem; margin-top:3px; line-height:1.4;">${tweet.text}</div>
+                    <div style="display:flex; gap:20px; margin-top:10px; color:#666; font-size:0.8rem;"><span>💬 4</span> <span>🔄 12</span> <span>❤️ 28</span></div>
+                </div>
+            </div>`;
+    });
+    content.innerHTML = html;
+}
+
+// [3] 연락처 & 전화: iOS 통화 스타일
+function renderContacts() {
+    const content = document.getElementById('phone-app-content');
+    content.innerHTML = Object.keys(PHONE_DB.calls).map(name => 
+        `<div onclick="makeCall('${name}')" style="padding:15px; border-bottom:1px solid #eee; cursor:pointer; font-size:1rem;">👤 ${name}</div>`
+    ).join('');
+}
+
+window.makeCall = function(name) {
+    const content = document.getElementById('phone-app-content');
+    content.style.background = "#1a1a1a";
+    content.style.color = "#fff";
+    content.innerHTML = `
+        <div style="text-align:center; padding-top:60px;">
+            <div style="width:80px; height:80px; background:#444; border-radius:50%; margin:0 auto 20px;"></div>
+            <div style="font-size:1.8rem; font-weight:bold;">${name}</div>
+            <p id="call-status">연결 중...</p>
+            <div style="margin-top:150px; background:#ff3b30; width:60px; height:60px; border-radius:50%; line-height:60px; font-size:2rem; margin:150px auto 0; cursor:pointer;" onclick="openApp('contacts')">📵</div>
+        </div>
+    `;
+    setTimeout(() => {
+        const status = document.getElementById('call-status');
+        if(status) {
+            status.innerText = "00:04";
+            const msg = document.createElement('p');
+            msg.style.padding = "20px";
+            msg.style.fontStyle = "italic";
+            msg.style.lineHeight = "1.6";
+            msg.innerText = `"${PHONE_DB.calls[name] || "......"}"`;
+            status.after(msg);
+        }
+    }, 2000);
+};
+
+// [4] 문자: iMessage 스타일
+function renderMessageList() {
+    const content = document.getElementById('phone-app-content');
+    content.innerHTML = `<h2 style="padding:10px;">메시지</h2>`;
+    PHONE_DB.messages.forEach((m, idx) => {
+        content.innerHTML += `
+            <div onclick="openChat(${idx})" style="padding:15px; border-bottom:1px solid #eee; cursor:pointer; display:flex; align-items:center;">
+                <div style="width:45px; height:45px; background:#ccc; border-radius:50%; margin-right:12px;"></div>
+                <div style="flex:1;">
+                    <div style="font-weight:bold;">${m.sender}</div>
+                    <div style="font-size:0.8rem; color:#888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:150px;">${m.lastText}</div>
+                </div>
+                <div style="color:#aaa; font-size:0.7rem;">어제</div>
+            </div>`;
+    });
+}
+
+window.openChat = function(idx) {
+    currentChatIndex = idx;
+    const chat = PHONE_DB.messages[idx];
+    document.getElementById('app-title').innerHTML = `<span onclick="openApp('message')" style="cursor:pointer;">⬅ ${chat.sender}</span>`;
+    const content = document.getElementById('phone-app-content');
+    content.innerHTML = `<div id="chat-bubbles" style="display:flex; flex-direction:column; gap:10px; padding:10px;"></div><div id="chat-choices" style="position:absolute; bottom:0; left:0; width:100%; background:#f4f4f4; padding:10px; box-sizing:border-box;"></div>`;
+    
+    const bubbleArea = document.getElementById('chat-bubbles');
+    chat.chatHistory.forEach(msg => {
+        const side = msg.type === 'in' ? 'flex-start' : 'flex-end';
+        const color = msg.type === 'in' ? '#e9e9eb' : '#007aff';
+        const textColor = msg.type === 'in' ? '#000' : '#fff';
+        bubbleArea.innerHTML += `<div style="align-self:${side}; background:${color}; color:${textColor}; padding:8px 15px; border-radius:18px; max-width:70%; font-size:0.9rem;">${msg.text}</div>`;
+    });
+
+    const choiceArea = document.getElementById('chat-choices');
+    if (chat.choices) {
+        choiceArea.innerHTML = `<p style="font-size:0.7rem; color:#888; margin-bottom:5px;">답장 선택하기</p>`;
+        chat.choices.forEach((c, cIdx) => {
+            choiceArea.innerHTML += `<button onclick="sendReply(${cIdx})" style="width:100%; margin-bottom:5px; padding:8px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer;">${c.text}</button>`;
+        });
+    }
+};
+
+window.sendReply = function(cIdx) {
+    const chat = PHONE_DB.messages[currentChatIndex];
+    const choice = chat.choices[cIdx];
+    
+    // 내 답변 추가
+    chat.chatHistory.push({ type: "out", text: choice.text });
+    // 선택지 제거 (일회용)
+    chat.choices = null;
+    
+    openChat(currentChatIndex); // 화면 갱신
+
+    // 1.5초 뒤 상대방 응답 추가
+    setTimeout(() => {
+        chat.chatHistory.push({ type: "in", text: choice.reply });
+        chat.lastText = choice.reply;
+        openChat(currentChatIndex);
+    }, 1500);
+};
+
+// [공통] 검색 상세 페이지
+window.renderSub = function(type) {
     const content = document.getElementById('phone-app-content');
     document.getElementById('app-title').innerHTML = `<span onclick="openApp('internet')" style="cursor:pointer;">⬅ SEARCH</span>`;
     if(type === 'wiki') content.innerHTML = PHONE_DB.internet.wiki_content;
     else if(type === 'ch2') content.innerHTML = PHONE_DB.internet.ch2_content;
 };
-
 window.makeCall = function(name) {
     const content = document.getElementById('phone-app-content');
     content.innerHTML = `<div style="text-align:center; margin-top:50px;"><h3>${name}</h3><p>연결 중...</p></div>`;
