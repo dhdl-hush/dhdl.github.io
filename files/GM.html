@@ -176,7 +176,7 @@
         const pcContainer = document.getElementById('pc-container');
         const statusText = document.getElementById('connection-status');
 
-        // 4. [기능] PC 상태 실시간 감시 (수정 버전)
+// 4. [기능] PC 상태 실시간 감시 (통합 수정 버전)
         onValue(ref(db, 'room_01'), (snapshot) => {
             statusText.innerText = "데이터 실시간 동기화 중 (" + new Date().toLocaleTimeString() + ")";
             const data = snapshot.val();
@@ -186,14 +186,11 @@
             for (let pcId in data) {
                 const pc = data[pcId];
                 
-                // --- 추가된 부분: 현재 수치 가져오기 ---
+                // 현재 수치 계산
                 const currentHp = (pc.hp !== undefined) ? pc.hp : 6;
                 const currentSan = (pc.san !== undefined) ? pc.san : 6;
 
-                const card = document.createElement('div');
-                card.className = `pc-card ${pc.lastDice === 2 ? 'fumble' : ''} ${pc.lastDice === 12 ? 'special' : ''}`;
-                
-                // 인벤토리 목록 생성 (이 부분은 기존과 동일)
+                // 인벤토리 목록 생성
                 let invHtml = '<div style="margin-top:10px; border-top:1px solid #222; padding-top:10px;">';
                 invHtml += '<div style="font-size:0.8rem; color:#888; margin-bottom:5px;">보유 인벤토리:</div>';
                 if (pc.inventory) {
@@ -211,29 +208,33 @@
                 }
                 invHtml += '</div>';
 
-                // --- 수정된 부분: 수치 조절 버튼 추가 ---
-                // GM 페이지 card.innerHTML 내부 수정
-        card.innerHTML = `
-            <div class="pc-name">${pcId.toUpperCase()} : ${pc.name || '미설정'}</div>
+                // 세부 정보(연령, 성별, 호기심 등) HTML 생성
+                let detailHtml = `
+                    <div style="font-size:0.7rem; color:#aaa; margin-bottom:5px; border-bottom:1px solid #222; padding-bottom:5px;">
+                        ${pc.age || '?'}세 / ${pc.sex || '?'} / ${pc.job || '직업 미설정'} (공적점: ${pc.point || 0})
+                    </div>
+                    <div style="font-size:0.7rem; margin-bottom:10px;">
+                        <span style="color:#00ffcc">호: ${pc.curiosity || '-'}</span> | 
+                        <span style="color:#ff4d4d">공: ${pc.fear || '-'}</span>
+                    </div>
+                `;
 
-            // GM 페이지 card.innerHTML 안에서 pc-name 아래 정도에 넣으면 좋습니다.
-let detailHtml = `
-    <div style="font-size:0.7rem; color:#aaa; margin-bottom:5px; border-bottom:1px solid #222; padding-bottom:5px;">
-        ${pc.age || '?'}세 / ${pc.sex || '?'} / ${pc.job || '직업 미설정'} (공적점: ${pc.point || 0})
-    </div>
-    <div style="font-size:0.7rem; margin-bottom:10px;">
-        <span style="color:#00ffcc">호: ${pc.curiosity || '-'}</span> | 
-        <span style="color:#ff4d4d">공: ${pc.fear || '-'}</span>
-    </div>
-`;
-    
-            <!-- 자동 줄바꿈(pre-wrap)과 영역 제한(break-all) 추가 -->
-            <div style="font-size: 0.75rem; color: #888; margin-bottom: 12px; 
-                        white-space: pre-wrap; word-break: break-all; 
-                        line-height: 1.4; border-bottom: 1px solid #222; padding-bottom: 8px;
-                        max-height: 100px; overflow-y: auto;">
-                ${pc.note || '메모 없음'}
-            </div>              
+                const card = document.createElement('div');
+                card.className = `pc-card ${pc.lastDice === 2 ? 'fumble' : ''} ${pc.lastDice === 12 ? 'special' : ''}`;
+                
+                // 카드 전체 레이아웃 구성
+                card.innerHTML = `
+                    <div class="pc-name" style="margin-bottom:5px;">${pcId.toUpperCase()} : ${pc.name || '미설정'}</div>
+                    
+                    ${detailHtml}
+
+                    <div style="font-size: 0.75rem; color: #888; margin-bottom: 12px; 
+                                white-space: pre-wrap; word-break: break-all; 
+                                line-height: 1.4; border-bottom: 1px solid #222; padding-bottom: 8px;
+                                max-height: 80px; overflow-y: auto;">
+                        ${pc.note || '메모 없음'}
+                    </div>
+
                     <!-- 생명력 조절 -->
                     <div class="stat-line" style="display:flex; justify-content:space-between; margin-bottom:5px;">
                         <span>생명력</span> 
@@ -257,7 +258,7 @@ let detailHtml = `
                     <div class="dice-box"><div class="dice-num">${pc.lastDice || '?'}</div></div>
                     ${invHtml}
                 `;
-                pcContainer.appendChild(card); // 카드 화면에 추가
+                pcContainer.appendChild(card);
             }
         });
 
