@@ -90,6 +90,44 @@
 .ability-table th { background: #222; color: #888; padding: 5px; border: 1px solid #333; }
 .ability-table td { border: 1px solid #333; padding: 0; }
 .ability-table input { width: 100%; background: transparent; border: none; color: #fff; padding: 5px; box-sizing: border-box; font-size: 0.75rem; }
+
+        /* 스마트폰 본체 */
+#smartphone-overlay {
+    position: fixed; bottom: 20px; right: 20px;
+    width: 280px; height: 500px;
+    background: #111; border: 8px solid #333; border-radius: 30px;
+    z-index: 20000; box-shadow: 0 0 30px rgba(0,0,0,0.8);
+    display: none; flex-direction: column; overflow: hidden;
+    font-family: sans-serif;
+}
+
+/* 화면 내부 */
+.phone-screen {
+    flex-grow: 1; background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-1.2.1&auto=format&fit=crop&w=280&q=80');
+    background-size: cover; padding: 20px; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 20px;
+}
+
+/* 앱 아이콘 */
+.app-icon {
+    width: 50px; height: 50px; background: rgba(255,255,255,0.2);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; cursor: pointer; transition: 0.2s; backdrop-filter: blur(5px);
+}
+.app-icon:hover { transform: scale(1.1); background: rgba(255,255,255,0.4); }
+.app-label { font-size: 0.6rem; color: white; text-align: center; margin-top: 5px; width: 50px; }
+
+/* 앱 화면 헤더 */
+.app-header {
+    background: #222; padding: 15px; display: none; justify-content: space-between; align-items: center;
+}
+
+/* 스마트폰 열기 버튼 */
+#phone-open-btn {
+    position: fixed; bottom: 20px; right: 20px;
+    background: white; color: black; border-radius: 50%;
+    width: 60px; height: 60px; font-size: 1.5rem; border: none;
+    cursor: pointer; z-index: 19999; display: none; box-shadow: 0 0 15px rgba(255,255,255,0.3);
+}
         
     </style>
 </head>
@@ -217,6 +255,32 @@
         </div>
         <button onclick="closeHandout()" style="width:100%; margin-top:10px; padding:10px; background:#333; color:#fff; border:none; cursor:pointer;">창 닫기</button>
     </div>
+
+    <!-- 스마트폰 열기 버튼 -->
+<button id="phone-open-btn" onclick="togglePhoneUI()">📱</button>
+
+<!-- 스마트폰 본체 -->
+<div id="smartphone-overlay">
+    <!-- 앱 상단바 (뒤로가기 등) -->
+    <div id="phone-app-header" class="app-header">
+        <span onclick="closeApp()" style="cursor:pointer;">◀</span>
+        <span id="app-title">HOME</span>
+        <span>●</span>
+    </div>
+
+    <!-- 홈 화면 -->
+    <div id="phone-home" class="phone-screen">
+        <div onclick="openApp('internet', '🌐')"><div class="app-icon">🌐</div><div class="app-label">인터넷</div></div>
+        <div onclick="openApp('sns', '📱')"><div class="app-icon" style="background:#1da1f2;">🐦</div><div class="app-label">SNS</div></div>
+        <div onclick="openApp('contacts', '👥')"><div class="app-icon" style="background:#4cd964;">👥</div><div class="app-label">연락처</div></div>
+        <div onclick="openApp('message', '💬')"><div class="app-icon" style="background:#ffcc00;">💬</div><div class="app-label">문자</div></div>
+    </div>
+
+    <!-- 앱 실행 화면 (기본 숨김) -->
+    <div id="phone-app-content" style="display:none; flex-grow:1; background:white; color:black; padding:15px; overflow-y:auto;">
+        <!-- 여기에 앱 내용이 들어감 -->
+    </div>
+</div>
 
     <!-- 파이어베이스 로직 -->
     <script type="module">
@@ -467,6 +531,56 @@ onValue(ref(db, 'room_01/battle/active'), (snapshot) => {
                 list.appendChild(itemDiv);
             }
         });
+
+        // --- 스마트폰 시스템 로직 ---
+        let isPhoneOpen = false;
+
+        // 1. 소유권 실시간 감시
+        onValue(ref(db, pcPath), (snapshot) => {
+            const data = snapshot.val();
+            const btn = document.getElementById('phone-open-btn');
+            const phone = document.getElementById('smartphone-overlay');
+            
+            if (data && data.hasPhone) {
+                btn.style.display = "block"; // 버튼 보이기
+            } else {
+                btn.style.display = "none";
+                phone.style.display = "none"; // 소유권 뺏기면 화면 닫기
+            }
+        });
+
+        window.togglePhoneUI = function() {
+            const phone = document.getElementById('smartphone-overlay');
+            isPhoneOpen = !isPhoneOpen;
+            phone.style.display = isPhoneOpen ? "flex" : "none";
+            if(!isPhoneOpen) closeApp();
+        };
+
+        window.openApp = function(appName, icon) {
+            document.getElementById('phone-home').style.display = "none";
+            document.getElementById('phone-app-header').style.display = "flex";
+            document.getElementById('phone-app-content').style.display = "block";
+            document.getElementById('app-title').innerText = appName.toUpperCase();
+            
+            const content = document.getElementById('phone-app-content');
+            
+            // 앱별 초기 내용 (상세 내용은 나중에 구현)
+            if(appName === 'internet') {
+                content.innerHTML = "<h4>Search</h4><input type='text' style='width:100%' placeholder='검색어 입력...'><p style='font-size:0.8rem; color:#666; margin-top:20px;'>인터넷에 연결할 수 없습니다.</p>";
+            } else if(appName === 'sns') {
+                content.innerHTML = "<div style='border-bottom:1px solid #ddd; padding:10px;'><b>@unknown</b><br>여긴 어디지...?</div>";
+            } else if(appName === 'contacts') {
+                content.innerHTML = "<li>엄마</li><li>112</li><li>119</li>";
+            } else if(appName === 'message') {
+                content.innerHTML = "<p>수신된 메시지가 없습니다.</p>";
+            }
+        };
+
+        window.closeApp = function() {
+            document.getElementById('phone-home').style.display = "flex";
+            document.getElementById('phone-app-header').style.display = "none";
+            document.getElementById('phone-app-content').style.display = "none";
+        };
     </script>
 </body>
 </html>
