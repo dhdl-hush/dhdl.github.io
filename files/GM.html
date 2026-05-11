@@ -69,6 +69,15 @@
     <h1>GM 모니터링 시스템</h1>
     <div id="connection-status" style="text-align: center; font-size: 0.8rem; color: #666;">연결 시도 중...</div>
 
+    <!-- 메인 보드 관리창 -->
+<div class="handout-sender" style="border-color: #0066ff; background: rgba(0, 102, 255, 0.05); margin-top: 30px;">
+    <h2 style="color: #0066ff;">🌐 메인 보드 관리 (전체 공개 중인 정보)</h2>
+    <div id="gm-public-list" style="display: flex; flex-direction: column; gap: 8px;">
+        <!-- 현재 공개 중인 목록이 여기에 뜹니다 -->
+        <p style="color: #444; font-size: 0.8rem;">공개된 정보가 없습니다.</p>
+    </div>
+</div>
+
     <!-- PC 상태 카드들이 보일 곳 -->
     <div id="pc-container"></div>
 
@@ -475,10 +484,43 @@ window.launchBattle = function() {
             });
         };
 
-        // (선택) 메인 보드 초기화 함수 (필요하면 버튼 만드세요)
-        window.clearPublicHandouts = function() {
-            if(confirm("메인 보드의 모든 공개 정보를 삭제할까요?")) {
-                remove(ref(db, 'room_01/public_handouts'));
+        // --- 메인 보드 실시간 관리 (GM 전용) ---
+        const publicBoardRef = ref(db, 'room_01/public_handouts');
+
+        onValue(publicBoardRef, (snapshot) => {
+            const listArea = document.getElementById('gm-public-list');
+            const data = snapshot.val();
+            
+            listArea.innerHTML = ""; // 초기화
+
+            if (!data) {
+                listArea.innerHTML = '<p style="color: #444; font-size: 0.8rem;">공개된 정보가 없습니다.</p>';
+                return;
+            }
+
+            for (let id in data) {
+                const ho = data[id];
+                const itemDiv = document.createElement('div');
+                itemDiv.style = "display: flex; justify-content: space-between; align-items: center; background: #000; border: 1px solid #0066ff; padding: 10px; border-radius: 3px;";
+                
+                itemDiv.innerHTML = `
+                    <span style="font-size: 0.9rem; color: #fff;">${ho.title}</span>
+                    <button onclick="window.removePublicHandout('${id}')" 
+                            style="background: transparent; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 3px 10px; cursor: pointer; font-size: 0.75rem;">
+                        내리기
+                    </button>
+                `;
+                listArea.appendChild(itemDiv);
+            }
+        });
+
+        // 메인 보드에서 특정 항목 삭제 함수
+        window.removePublicHandout = function(itemId) {
+            if(confirm("이 정보를 메인 보드에서 내리시겠습니까? 모든 PC 화면에서 즉시 사라집니다.")) {
+                const targetRef = ref(db, `room_01/public_handouts/${itemId}`);
+                remove(targetRef).then(() => {
+                    console.log("메인 보드 정보 삭제 완료");
+                });
             }
         };
     </script>
