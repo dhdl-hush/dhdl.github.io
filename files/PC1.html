@@ -98,6 +98,14 @@
     <div class="overlay"></div>
     <header><h1>INSANE : CHARACTER SHEET</h1></header>
 
+    <!-- 메인 보드 (공개된 핸드아웃) -->
+<div class="container" style="border-color: #0066ff; background: rgba(0, 102, 255, 0.05); margin-bottom: 10px;">
+    <h3 style="color: #0066ff; font-size: 0.8rem; margin-top: 0; letter-spacing: 2px;">MAIN BOARD (공개 정보)</h3>
+    <div id="public-handout-list" style="display: flex; flex-wrap: wrap; gap: 10px;">
+        <span style="color: #444; font-size: 0.8rem;">현재 공개된 정보가 없습니다.</span>
+    </div>
+</div>
+
     <div class="container">
         <!-- 1. 캐릭터 시트 (GM 조절 수치 실시간 수신) -->
         <div class="character-sheet">
@@ -430,6 +438,35 @@ onValue(ref(db, 'room_01/battle/active'), (snapshot) => {
         window.location.href = `WAR.html?id=${myId}`;
     }
 });
+
+        // --- 10. 메인 보드(공개 핸드아웃) 감시 ---
+        const publicRef = ref(db, 'room_01/public_handouts');
+        
+        onValue(publicRef, (snapshot) => {
+            const list = document.getElementById('public-handout-list');
+            const data = snapshot.val();
+            
+            list.innerHTML = ""; // 초기화
+            
+            if(!data) {
+                list.innerHTML = '<span style="color: #444; font-size: 0.8rem;">현재 공개된 정보가 없습니다.</span>';
+                return;
+            }
+
+            for(let id in data) {
+                const ho = data[id];
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item-slot';
+                itemDiv.style.borderColor = "#0066ff";
+                itemDiv.style.minWidth = "120px";
+                itemDiv.innerText = ho.title;
+                
+                // 클릭 시 팝업 열기 (비밀과 쇼크는 없음으로 전달)
+                itemDiv.onclick = () => window.showHandout(ho.title, ho.content, "공개된 정보에는 비밀이 없습니다.", "없음");
+                
+                list.appendChild(itemDiv);
+            }
+        });
     </script>
 </body>
 </html>
