@@ -434,21 +434,24 @@ window.sendRealItem = function(pcId, type) {
     });
 };
 
-        window.launchBattle = function() {
+window.launchBattle = function() {
     const bossData = {
         name: document.getElementById('boss-name').value,
         hp: parseInt(document.getElementById('boss-hp').value),
         san: parseInt(document.getElementById('boss-san').value),
-        plotReady: false,
-        currentPlot: 0
+        lastDice: 0,
+        currentPlot: 0,
+        plotReady: false
     };
     
+    // 보스 데이터 생성 및 전투 활성화
     update(ref(db, 'room_01/npc'), bossData);
     update(ref(db, 'room_01/battle'), { 
         active: true, 
-        status: 'waiting' 
+        status: 'waiting',
+        round: 1 
     }).then(() => {
-        window.location.href = 'WAR.html?id=gm';
+        window.location.href = 'WAR.html?id=gm'; // GM도 전투페이지로 이동
     });
 };
     </script>
