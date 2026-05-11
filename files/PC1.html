@@ -460,22 +460,109 @@
         isPhoneOpen = !isPhoneOpen; p.style.display = isPhoneOpen ? "flex" : "none";
         if(!isPhoneOpen) window.closeApp();
     };
-    window.openApp = (appName) => {
-        document.getElementById('phone-home').style.display = "none";
-        document.getElementById('phone-app-header').style.display = "flex";
-        document.getElementById('phone-app-content').style.display = "block";
-        document.getElementById('app-title').innerText = appName.toUpperCase();
-        const c = document.getElementById('phone-app-content');
-        if(appName === 'internet') c.innerHTML = "<p>연결 오류</p>";
-        else if(appName === 'sns') c.innerHTML = "<p>알림 없음</p>";
-        else if(appName === 'contacts') c.innerHTML = "<li>엄마</li><li>112</li>";
-        else if(appName === 'message') c.innerHTML = "<p>문자 없음</p>";
-    };
-    window.closeApp = () => {
-        document.getElementById('phone-home').style.display = "flex";
-        document.getElementById('phone-app-header').style.display = "none";
-        document.getElementById('phone-app-content').style.display = "none";
-    };
+    // ================================================================
+// 📱 스마트폰 컨텐츠 설정 (여기서 내용을 마음대로 수정하세요!)
+// ================================================================
+const PHONE_DB = {
+    // [1] 인터넷 앱 내용
+    internet: {
+        google_results: [
+            { title: "키사라기역 - 위키백과", desc: "존재하지 않는 역에 대한 도시전설..." },
+            { title: "2ch 실황 스레드", desc: "지금 이상한 역에 내렸는데.. (진행중)" }
+        ],
+        wiki_content: `/* ━━━━ 수정할 부분 ━━━━ */
+            <h4>키사라기역(如月駅)</h4>
+            <p>일본의 철도 노선에 존재하지 않는 유령역. 
+            2004년 2ch 스레드에 올라온 실황 글이 시초가 되었다. 
+            그곳에 내린 사람은 다시는 돌아올 수 없다고 전해진다.</p>
+        `,
+        ch2_content: `/* ━━━━ 수정할 부분 ━━━━ */
+            <h4>2ch 실황 스레드</h4>
+            <p><b>[14:12] ID:Hasumi</b> : 전차가 멈추지 않아. 벌써 20분째 달리고 있어.</p>
+            <p><b>[14:20] ID:Hasumi</b> : '키사라기역' 이라는 곳에 내렸어. 여긴 어디지?</p>
+        `
+    },
+    // [2] SNS(트위터) 앱 내용
+    sns: {
+        feed: `/* ━━━━ 수정할 부분 ━━━━ */
+            <div style="border-bottom:1px solid #ddd; padding:10px;">
+                <b>@News_Bot</b> [속보] 시즈오카현 실종자 속출... <br><br>
+                <b>@Kisaragi_Ghost</b> 누가 좀 도와줘.. 여긴 전파가 안 터져..
+            </div>
+        `
+    },
+    // [3] 전화기 너머 목소리 설정
+    calls: {
+        "경찰": "치-익... 여보세요? 아, 또 장난전화인가... (끊김)",
+        "택시": "그곳까지는 갈 수 없습니다. 길이... 끊겨있거든요.",
+        "부모님": "어디니? 지금 밥 차려놨는데... 왜 목소리가 안 들리니?"
+    },
+    // [4] 문자 메시지 목록 (선택지 포함)
+    messages: [
+        { sender: "친구", text: "야 너 어디야? 수업 시작했다." },
+        { sender: "모르는 번호", text: "뒤를 봐." }
+    ]
+};
+// ================================================================
+
+
+// --- 스마트폰 제어 기능 (아래는 로직이므로 건드리지 않아도 됩니다) ---
+window.openApp = function(appName) {
+    document.getElementById('phone-home').style.display = "none";
+    document.getElementById('phone-app-header').style.display = "flex";
+    document.getElementById('phone-app-content').style.display = "block";
+    document.getElementById('app-title').innerText = appName.toUpperCase();
+    
+    const content = document.getElementById('phone-app-content');
+    content.style.background = "#fff"; content.style.color = "#000";
+
+    if(appName === 'internet') {
+        content.innerHTML = `
+            <div style="font-size:0.7rem; border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px;">
+                <span onclick="openApp('internet')" style="color:blue; cursor:pointer;">[검색]</span> 
+                <span onclick="renderSub('wiki')" style="color:blue; cursor:pointer;">[위키]</span> 
+                <span onclick="renderSub('ch2')" style="color:blue; cursor:pointer;">[2ch]</span>
+            </div>
+            <div id="sub-content">
+                <b>Google: 키사라기역</b><br>
+                ${PHONE_DB.internet.google_results.map(r => `<li style="font-size:0.8rem; margin-top:10px;"><b>${r.title}</b><br>${r.desc}</li>`).join('')}
+            </div>`;
+    } else if(appName === 'sns') {
+        content.innerHTML = `<div style="background:#1da1f2; color:white; padding:5px; font-size:0.8rem;">Twitter</div>${PHONE_DB.sns.feed}`;
+    } else if(appName === 'contacts') {
+        content.innerHTML = Object.keys(PHONE_DB.calls).map(name => 
+            `<div onclick="makeCall('${name}')" style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;">👤 ${name}</div>`).join('');
+    } else if(appName === 'message') {
+        content.innerHTML = PHONE_DB.messages.map(m => 
+            `<div style="background:#eee; padding:10px; border-radius:10px; margin-bottom:10px; font-size:0.8rem;">
+                <b>${m.sender}</b><br>${m.text}
+            </div>`).join('') + `<hr><p style="font-size:0.7rem; color:#888;">[답장 선택지]<br>1. 무서워<br>2. 데리러 와</p>`;
+    }
+};
+
+window.renderSub = (type) => {
+    document.getElementById('sub-content').innerHTML = type === 'wiki' ? PHONE_DB.internet.wiki_content : PHONE_DB.internet.ch2_content;
+};
+
+window.makeCall = function(name) {
+    const content = document.getElementById('phone-app-content');
+    content.innerHTML = `<div style="text-align:center; margin-top:50px;"><h3>${name}</h3><p>연결 중...</p></div>`;
+    setTimeout(() => {
+        content.innerHTML = `
+            <div style="text-align:center; margin-top:50px;">
+                <h3>${name}</h3><hr>
+                <p style="padding:20px; font-style:italic;">"${PHONE_DB.calls[name] || "......"}"</p>
+                <button onclick="openApp('contacts')" style="margin-top:20px;">종료</button>
+            </div>`;
+    }, 1500);
+};
+
+// 메인 화면으로 돌아가기 기능 유지
+window.closeApp = function() {
+    document.getElementById('phone-home').style.display = "flex";
+    document.getElementById('phone-app-header').style.display = "none";
+    document.getElementById('phone-app-content').style.display = "none";
+};
 
         // --- [수정] 스마트폰 소유권 전용 감시 로직 ---
 // pcPath + '/hasPhone'을 직접 감시해서 더 정확하게 반응하게 합니다.
